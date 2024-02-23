@@ -14,8 +14,7 @@ export const getRates = async (shipment: GetAftershipRatesType) => {
         charges: {
           weight: rate.charge_weight,
           perUnit: {
-            original: rate.total_charge.amount,
-            data: rate.total_charge.amount * 1.1,
+            priceVAT: rate.total_charge.amount * 1.1,
             currency: rate.total_charge.currency
           }
         }
@@ -41,7 +40,7 @@ export const getUserLabels = async (req: CustomRequest) => {
         const pageNumber = parseInt(page as string ?? '1') || 1;
         const limitNumber = parseInt(limit as string ?? '10') || 10; // Default limit is set to 10
 
-        const labels = await Label.find({ userId }, '-file')
+        const labels = await Label.find({ userId })
           .skip((pageNumber - 1) * limitNumber)
           .limit(limitNumber)
           .exec();
@@ -80,9 +79,8 @@ export const createLabelForShipment = async (payload: LabelPayloadType, userId: 
         orderNumber: order_number,
         orderId: order_id,
       })
-      const { file, ...labelWithoutFile } = localLabel;
 
-      return labelWithoutFile as any;
+      return localLabel as any;
     }
   } catch (error) {
     console.log((error as any).message);
