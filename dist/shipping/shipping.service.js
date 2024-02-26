@@ -48,7 +48,9 @@ const getRates = (shipment) => __awaiter(void 0, void 0, void 0, function* () {
                 charges: {
                     weight: rate.charge_weight,
                     perUnit: {
-                        priceVAT: rate.total_charge.amount * constants_1.COMMISSION_PERCENTAGE,
+                        priceWithoutVAT: rate.total_charge.amount * constants_1.COMMISSION_PERCENTAGE,
+                        VAT: '0.0',
+                        total: rate.total_charge.amount * constants_1.COMMISSION_PERCENTAGE,
                         currency: rate.total_charge.currency
                     }
                 }
@@ -80,7 +82,11 @@ const getUserLabels = (req) => __awaiter(void 0, void 0, void 0, function* () {
                 const updateLabels = labels.map(label => ({
                     _id: label._id.toString(),
                     serviceName: label.serviceName,
-                    charge: label.charge,
+                    charge: {
+                        priceWithoutVAT: (parseFloat(label.charge.amount) * constants_1.COMMISSION_PERCENTAGE).toFixed(2),
+                        VAT: '0.0',
+                        total: (parseFloat(label.charge.amount) * constants_1.COMMISSION_PERCENTAGE).toFixed(2),
+                    },
                     createdAt: label.createdAt,
                     status: label.status,
                     trackingNumbers: label.trackingNumbers,
@@ -127,7 +133,11 @@ const createLabelForShipment = (payload, userId) => __awaiter(void 0, void 0, vo
             return {
                 _id: localLabel._id.toString(),
                 serviceName: localLabel.serviceName,
-                charge: localLabel.charge,
+                charge: {
+                    priceWithoutVAT: (parseFloat(localLabel.charge.amount) * constants_1.COMMISSION_PERCENTAGE).toFixed(2),
+                    VAT: '0.0',
+                    total: (amount * constants_1.COMMISSION_PERCENTAGE).toFixed(2),
+                },
                 createdAt: localLabel.createdAt,
                 status: localLabel.status,
                 trackingNumbers: localLabel.trackingNumbers,

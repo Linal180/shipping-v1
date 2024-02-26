@@ -38,7 +38,9 @@ export const getRates = async (shipment: GetAftershipRatesType) => {
         charges: {
           weight: rate.charge_weight,
           perUnit: {
-            priceVAT: rate.total_charge.amount * COMMISSION_PERCENTAGE,
+            priceWithoutVAT: rate.total_charge.amount * COMMISSION_PERCENTAGE,
+            VAT: '0.0',
+            total: rate.total_charge.amount * COMMISSION_PERCENTAGE,
             currency: rate.total_charge.currency
           }
         }
@@ -73,7 +75,11 @@ export const getUserLabels = async (req: CustomRequest) => {
           const updateLabels = labels.map(label => ({
             _id: label._id.toString(),
             serviceName: label.serviceName,
-            charge: label.charge,
+            charge: {
+              priceWithoutVAT: (parseFloat(label.charge.amount) * COMMISSION_PERCENTAGE).toFixed(2),
+              VAT: '0.0',
+              total: (parseFloat(label.charge.amount) * COMMISSION_PERCENTAGE).toFixed(2),
+            },
             createdAt: label.createdAt,
             status: label.status,
             trackingNumbers: label.trackingNumbers,
@@ -125,7 +131,11 @@ export const createLabelForShipment = async (payload: LabelPayloadType, userId: 
       return {
         _id: localLabel._id.toString(),
         serviceName: localLabel.serviceName,
-        charge: localLabel.charge,
+        charge: {
+          priceWithoutVAT: (parseFloat(localLabel.charge.amount) * COMMISSION_PERCENTAGE).toFixed(2),
+          VAT: '0.0',
+          total: (amount * COMMISSION_PERCENTAGE).toFixed(2),
+        },
         createdAt: localLabel.createdAt,
         status: localLabel.status,
         trackingNumbers: localLabel.trackingNumbers,
