@@ -136,7 +136,7 @@ const createLabelForShipment = (payload, userId) => __awaiter(void 0, void 0, vo
                 charge: {
                     priceWithoutVAT: (parseFloat(localLabel.charge.amount) * constants_1.COMMISSION_PERCENTAGE).toFixed(2),
                     VAT: '0.0',
-                    total: (amount * constants_1.COMMISSION_PERCENTAGE).toFixed(2),
+                    total: (parseFloat(localLabel.charge.amount) * constants_1.COMMISSION_PERCENTAGE).toFixed(2),
                 },
                 createdAt: localLabel.createdAt,
                 status: localLabel.status,

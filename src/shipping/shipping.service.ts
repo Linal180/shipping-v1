@@ -134,7 +134,7 @@ export const createLabelForShipment = async (payload: LabelPayloadType, userId: 
         charge: {
           priceWithoutVAT: (parseFloat(localLabel.charge.amount) * COMMISSION_PERCENTAGE).toFixed(2),
           VAT: '0.0',
-          total: (amount * COMMISSION_PERCENTAGE).toFixed(2),
+          total: (parseFloat(localLabel.charge.amount) * COMMISSION_PERCENTAGE).toFixed(2),
         },
         createdAt: localLabel.createdAt,
         status: localLabel.status,
