@@ -77,7 +77,16 @@ const getUserLabels = (req) => __awaiter(void 0, void 0, void 0, function* () {
                     .limit(limitNumber)
                     .lean()
                     .exec();
-                const updateLabels = labels.map(label => (Object.assign(Object.assign({}, label), { file: (0, lib_1.generateLabelFileUrl)(label._id.toString()) })));
+                const updateLabels = labels.map(label => ({
+                    _id: label._id.toString(),
+                    serviceName: label.serviceName,
+                    charge: label.charge,
+                    createdAt: label.createdAt,
+                    status: label.status,
+                    trackingNumbers: label.trackingNumbers,
+                    orderNumber: label.orderNumber,
+                    file: (0, lib_1.generateLabelFileUrl)(label._id.toString())
+                }));
                 return updateLabels;
             }
         }
@@ -115,7 +124,16 @@ const createLabelForShipment = (payload, userId) => __awaiter(void 0, void 0, vo
                 orderId: order_id,
             });
             const localLabel = localLabelDoc.toObject();
-            return Object.assign(Object.assign({}, localLabel), { file: (0, lib_1.generateLabelFileUrl)(localLabel._id.toString()) });
+            return {
+                _id: localLabel._id.toString(),
+                serviceName: localLabel.serviceName,
+                charge: localLabel.charge,
+                createdAt: localLabel.createdAt,
+                status: localLabel.status,
+                trackingNumbers: localLabel.trackingNumbers,
+                orderNumber: localLabel.orderNumber,
+                file: (0, lib_1.generateLabelFileUrl)(localLabel._id.toString())
+            };
         }
     }
     catch (error) {

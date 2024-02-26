@@ -71,7 +71,13 @@ export const getUserLabels = async (req: CustomRequest) => {
           .exec();
 
           const updateLabels = labels.map(label => ({
-            ...label,
+            _id: label._id.toString(),
+            serviceName: label.serviceName,
+            charge: label.charge,
+            createdAt: label.createdAt,
+            status: label.status,
+            trackingNumbers: label.trackingNumbers,
+            orderNumber: label.orderNumber,
             file: generateLabelFileUrl(label._id.toString())
           }));
 
@@ -117,7 +123,13 @@ export const createLabelForShipment = async (payload: LabelPayloadType, userId: 
       const localLabel = localLabelDoc.toObject();
 
       return {
-        ...localLabel,
+        _id: localLabel._id.toString(),
+        serviceName: localLabel.serviceName,
+        charge: localLabel.charge,
+        createdAt: localLabel.createdAt,
+        status: localLabel.status,
+        trackingNumbers: localLabel.trackingNumbers,
+        orderNumber: localLabel.orderNumber,
         file: generateLabelFileUrl(localLabel._id.toString())
       } as any;
     }
