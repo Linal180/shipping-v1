@@ -13,7 +13,6 @@ const shipperAccountSchema = new mongoose_1.default.Schema({
     slug: String,
     description: String,
 });
-
 const fileSchema = new mongoose_1.default.Schema({
     url: {
         type: String,

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateRandomNumbers = exports.comparePassword = exports.hashPassword = void 0;
+exports.generateLabelFileUrl = exports.generateRandomNumbers = exports.comparePassword = exports.hashPassword = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const hashPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -38,4 +38,8 @@ const generateRandomNumbers = () => {
     return result;
 };
 exports.generateRandomNumbers = generateRandomNumbers;
+const generateLabelFileUrl = (id) => {
+    return `${process.env.BASE_URL || 'https://shipping-v1.vercel.app'}/shipping/get-file/${id}`;
+};
+exports.generateLabelFileUrl = generateLabelFileUrl;
 //# sourceMappingURL=index.js.map

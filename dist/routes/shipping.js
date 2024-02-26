@@ -8,6 +8,7 @@ const index_controller_1 = require("../shipping/index.controller");
 const auth_1 = require("../middlewares/auth");
 const router = express_1.default.Router();
 router.get('/rates', auth_1.authenticateToken, index_controller_1.getRates);
+router.get('/get-file/:id', index_controller_1.getFile);
 router.post('/create-label', auth_1.authenticateToken, index_controller_1.createLabel);
 router.get('/get-labels', auth_1.authenticateToken, index_controller_1.getLabels);
 exports.default = router;

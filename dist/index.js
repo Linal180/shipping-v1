@@ -19,7 +19,7 @@ app.use(express_1.default.json());
 app.use('/auth', auth_1.default);
 app.use('/shipping', shipping_1.default);
 app.get('/', (req, res) => {
-    res.send('Hello World!');
+    res.send('Hello Shipping World!');
 });
 app.listen(port, () => {
     return console.log(`Express is listening at http://localhost:${port}`);

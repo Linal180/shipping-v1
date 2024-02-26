@@ -1,6 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.USER_LOGGED_IN_SUCCESSFUL = exports.USER_ALREADY_EXIST = exports.REGISTER_SUCCESSFUL = exports.USER_REGISTRATION_FAILED = exports.USER_LOG_IN_FAILED = exports.WRONG_CREDENTIALS = exports.USER_NOT_FOUND = void 0;
+exports.USER_LOGGED_IN_SUCCESSFUL = exports.USER_ALREADY_EXIST = exports.REGISTER_SUCCESSFUL = exports.USER_REGISTRATION_FAILED = exports.USER_LOG_IN_FAILED = exports.WRONG_CREDENTIALS = exports.USER_NOT_FOUND = exports.COMMISSION_PERCENTAGE = void 0;
+/*
+|***************************************************************
+| Constants
+|*****************************************************************
+*/
+exports.COMMISSION_PERCENTAGE = 1.1; // 10%
 /*
 |***************************************************************
 | Messages

@@ -9,8 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLabels = exports.createLabel = exports.getRates = void 0;
+exports.getLabels = exports.createLabel = exports.getRates = exports.getFile = void 0;
 const shipping_service_1 = require("./shipping.service");
+const getFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const file = yield (0, shipping_service_1.getPDFFile)(id);
+        file.pipe(res);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send("Failed to get file");
+    }
+});
+exports.getFile = getFile;
 const getRates = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const shipmentDetails = req.body;

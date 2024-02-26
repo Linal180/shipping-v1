@@ -8,25 +8,37 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createLabelForShipment = exports.getUserLabels = exports.getRates = void 0;
-const label_1 = __importDefault(require("../models/label"));
-const aftershipService_1 = require("../aftershipService");
+exports.createLabelForShipment = exports.getUserLabels = exports.getRates = exports.getPDFFile = void 0;
+const axios_1 = __importDefault(require("axios"));
 const user_1 = __importDefault(require("../models/user"));
+const label_1 = __importDefault(require("../models/label"));
+const lib_1 = require("../lib");
+const constants_1 = require("../constants");
+const aftershipService_1 = require("../aftershipService");
+const getPDFFile = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const url = yield getLabelFile(id);
+        if (url) {
+            const response = yield (0, axios_1.default)({
+                method: 'get',
+                url,
+                responseType: 'stream',
+                headers: { 'Content-Type': 'application/pdf' }
+            });
+            return response.data;
+        }
+        return null;
+    }
+    catch (error) {
+        console.error('Failed to fetch PDF:', error);
+        return null;
+    }
+});
+exports.getPDFFile = getPDFFile;
 const getRates = (shipment) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const rates = yield (0, aftershipService_1.getAftershipRates)(shipment);
@@ -36,8 +48,7 @@ const getRates = (shipment) => __awaiter(void 0, void 0, void 0, function* () {
                 charges: {
                     weight: rate.charge_weight,
                     perUnit: {
-                        original: rate.total_charge.amount,
-                        data: rate.total_charge.amount * 1.1,
+                        priceVAT: rate.total_charge.amount * constants_1.COMMISSION_PERCENTAGE,
                         currency: rate.total_charge.currency
                     }
                 }
@@ -60,12 +71,14 @@ const getUserLabels = (req) => __awaiter(void 0, void 0, void 0, function* () {
             const currentUser = yield user_1.default.findOne({ _id: userId });
             if (currentUser) {
                 const pageNumber = parseInt((_a = page) !== null && _a !== void 0 ? _a : '1') || 1;
-                const limitNumber = parseInt((_b = limit) !== null && _b !== void 0 ? _b : '10') || 10; // Default limit is set to 10
-                const labels = yield label_1.default.find({ userId }, '-file')
+                const limitNumber = parseInt((_b = limit) !== null && _b !== void 0 ? _b : '10') || 10;
+                const labels = yield label_1.default.find({ userId })
                     .skip((pageNumber - 1) * limitNumber)
                     .limit(limitNumber)
+                    .lean()
                     .exec();
-                return labels;
+                const updateLabels = labels.map(label => (Object.assign(Object.assign({}, label), { file: (0, lib_1.generateLabelFileUrl)(label._id.toString()) })));
+                return updateLabels;
             }
         }
         return null;
@@ -83,10 +96,14 @@ const createLabelForShipment = (payload, userId) => __awaiter(void 0, void 0, vo
             const { id, files, rate, ship_date, status, tracking_numbers, shipper_account, order_id, order_number } = label;
             const { service_name, service_type, total_charge } = rate;
             const { label: { file_type, paper_size, url } = {} } = files;
-            const localLabel = yield label_1.default.create({
+            const { amount, currency } = total_charge;
+            const localLabelDoc = yield label_1.default.create({
                 userId,
                 status,
-                charge: total_charge,
+                charge: {
+                    amount: (amount * constants_1.COMMISSION_PERCENTAGE).toFixed(2),
+                    currency
+                },
                 externalId: id,
                 file: { fileType: file_type, paperSize: paper_size, url },
                 serviceName: service_name,
@@ -97,8 +114,8 @@ const createLabelForShipment = (payload, userId) => __awaiter(void 0, void 0, vo
                 orderNumber: order_number,
                 orderId: order_id,
             });
-            const { file } = localLabel, labelWithoutFile = __rest(localLabel, ["file"]);
-            return labelWithoutFile;
+            const localLabel = localLabelDoc.toObject();
+            return Object.assign(Object.assign({}, localLabel), { file: (0, lib_1.generateLabelFileUrl)(localLabel._id.toString()) });
         }
     }
     catch (error) {
@@ -107,4 +124,13 @@ const createLabelForShipment = (payload, userId) => __awaiter(void 0, void 0, vo
     }
 });
 exports.createLabelForShipment = createLabelForShipment;
+const getLabelFile = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    if (id) {
+        const label = yield label_1.default.findOne({ _id: id }).exec();
+        if (label) {
+            return label.file.url;
+        }
+    }
+    throw new Error('Could not find label');
+});
 //# sourceMappingURL=shipping.service.js.map
