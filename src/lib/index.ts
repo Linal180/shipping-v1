@@ -24,3 +24,7 @@ export const  generateRandomNumbers = () => {
 
   return result;
 }
+
+export const generateLabelFileUrl = (id: string) => {
+  return `${process.env.BASE_URL || 'https://shipping-v1.vercel.app'}/shipping/get-file/${id}`
+}

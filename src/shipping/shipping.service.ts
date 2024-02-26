@@ -1,8 +1,32 @@
-import Label from '../models/label';
-import { createLabel, getAftershipRates } from "../aftershipService";
-import { CreateLabelPayload, CustomRequest, CustomSession, GetAftershipRatesType, LabelPayloadType } from "../interfaces";
+import axios from 'axios'
 import User from '../models/user';
+import Label from '../models/label';
+import { generateLabelFileUrl } from '../lib';
+import { COMMISSION_PERCENTAGE } from '../constants';
+import { createLabel, getAftershipRates } from "../aftershipService";
+import { CustomRequest, GetAftershipRatesType, LabelPayloadType } from "../interfaces";
 
+export const getPDFFile = async (id: string) => {
+  try {
+    const url = await getLabelFile(id);
+
+    if(url){
+      const response = await axios({
+        method: 'get',
+        url,
+        responseType: 'stream',
+        headers: { 'Content-Type': 'application/pdf' }
+      });
+
+      return response.data
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Failed to fetch PDF:', error);
+    return null
+  }
+};
 
 export const getRates = async (shipment: GetAftershipRatesType) => {
   try {
@@ -14,7 +38,7 @@ export const getRates = async (shipment: GetAftershipRatesType) => {
         charges: {
           weight: rate.charge_weight,
           perUnit: {
-            priceVAT: rate.total_charge.amount * 1.1,
+            priceVAT: rate.total_charge.amount * COMMISSION_PERCENTAGE,
             currency: rate.total_charge.currency
           }
         }
@@ -38,14 +62,20 @@ export const getUserLabels = async (req: CustomRequest) => {
 
       if(currentUser){
         const pageNumber = parseInt(page as string ?? '1') || 1;
-        const limitNumber = parseInt(limit as string ?? '10') || 10; // Default limit is set to 10
+        const limitNumber = parseInt(limit as string ?? '10') || 10;
 
         const labels = await Label.find({ userId })
           .skip((pageNumber - 1) * limitNumber)
           .limit(limitNumber)
+          .lean()
           .exec();
 
-        return labels;
+          const updateLabels = labels.map(label => ({
+            ...label,
+            file: generateLabelFileUrl(label._id.toString())
+          }));
+
+        return updateLabels;
       }
     }
 
@@ -64,11 +94,15 @@ export const createLabelForShipment = async (payload: LabelPayloadType, userId: 
       const { id, files, rate, ship_date, status, tracking_numbers, shipper_account, order_id, order_number } = label
       const { service_name, service_type, total_charge } = rate
       const { label: { file_type, paper_size, url } = {} } = files
+      const { amount, currency } = total_charge
 
-      const localLabel = await Label.create({
+      const localLabelDoc = await Label.create({
         userId,
         status,
-        charge: total_charge,
+        charge: {
+          amount: (amount * COMMISSION_PERCENTAGE).toFixed(2),
+          currency
+        },
         externalId: id,
         file: { fileType: file_type, paperSize: paper_size, url },
         serviceName: service_name,
@@ -80,10 +114,27 @@ export const createLabelForShipment = async (payload: LabelPayloadType, userId: 
         orderId: order_id,
       })
 
-      return localLabel as any;
+      const localLabel = localLabelDoc.toObject();
+
+      return {
+        ...localLabel,
+        file: generateLabelFileUrl(localLabel._id.toString())
+      } as any;
     }
   } catch (error) {
     console.log((error as any).message);
     return null
   }
 };
+
+const getLabelFile = async (id: string): Promise<string> => {
+  if(id){
+    const label = await Label.findOne({ _id: id }).exec()
+
+    if(label) {
+      return label.file.url
+    }
+  }
+
+  throw new Error('Could not find label')
+}

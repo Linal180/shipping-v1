@@ -1,6 +1,18 @@
 import { Request, Response } from 'express';
-import { CustomRequest, CustomSession, GetAftershipRatesType, LabelPayloadType } from '../interfaces';
-import { getRates as getServiceRates,  createLabelForShipment, getUserLabels} from './shipping.service';
+import { CustomRequest, GetAftershipRatesType, LabelPayloadType } from '../interfaces';
+import { getRates as getServiceRates,  createLabelForShipment, getUserLabels, getPDFFile} from './shipping.service';
+
+export const getFile = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const file = await getPDFFile(id);
+    file.pipe(res);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Failed to get file");
+  }
+}
 
 export const getRates = async (req: Request, res: Response) => {
   try {
