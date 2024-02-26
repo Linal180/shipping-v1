@@ -19,7 +19,7 @@ app.use('/auth', authRoutes);
 app.use('/shipping', shippingRoutes);
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send('Hello Shipping World!');
 });
 
 app.listen(port, () => {
