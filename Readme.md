@@ -1,10 +1,34 @@
-# Nodejs FES Template
+------------------------------------------------------------------------------------------
+Special note for Client:
+If you are abble to view this file, it means you have successfully unzip the project.
+
+You must have Node and NPM installed (see https://www.digitalocean.com/community/tutorials/how-to-install-node-js-with-nvm-node-version-manager-on-a-vps)
+
+Now follow the instructions:
+1. Go to the project directory
+2. Run the command "npm install"
+3. Run the command "npm run build"
+4. Got the the Postman workplace where I have added you.
+5. Change BASE_API_URL to "http://localhost:3001"
+
+Now you will be able to access the APIs from the project running locally
+
+
+Right now project is deployed on vercel under our account.
+It will be transfer to you account once you have your account on vercel or on some other cloud hosting site
+
+
+------------------------------------------------------------------------------------------
+
+
+
 
 # Environment vars
 Need to add required environment variables
 
 # Pre-requisites
 - Install [Node.js](https://nodejs.org/en/) version > 18.0.0
+- Install [NPM] version > 9.0.0
 
 
 # Getting started
@@ -82,4 +106,3 @@ Npm scripts basically allow us to call (and chain) terminal commands via npm.
 | `build`                   | create a latest build in dist      |
 | `ts-check`                   | Check for typescript issues - if any       |
 | `add-build`                   | Add all latest changes for dist in git commit     |
-

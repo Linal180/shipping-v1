@@ -1,7 +1,8 @@
 import axios from 'axios'
 import User from '../models/user';
 import Label from '../models/label';
-import { generateLabelFileUrl } from '../lib';
+import { Request } from 'express'
+import { customizeLabel, generateLabelFileUrl, getNextSequenceId } from '../lib';
 import { COMMISSION_PERCENTAGE } from '../constants';
 import { createLabel, getAftershipRates } from "../aftershipService";
 import { CustomRequest, GetAftershipRatesType, LabelPayloadType } from "../interfaces";
@@ -54,6 +55,23 @@ export const getRates = async (shipment: GetAftershipRatesType) => {
   }
 };
 
+export const getSingleLabel = async (req: Request) => {
+  try {
+    const { params: { id } } = req || {};
+
+    if(id){
+      const label = await Label.findOne({ _id: id })
+
+      if(label) return customizeLabel(label);
+    }
+
+    return null;
+  } catch (error) {
+    console.log((error as any).message);
+    return null
+  }
+};
+
 export const getUserLabels = async (req: CustomRequest) => {
   try {
     const { user: { userId }, query } = req || {};
@@ -72,20 +90,7 @@ export const getUserLabels = async (req: CustomRequest) => {
           .lean()
           .exec();
 
-          const updateLabels = labels.map(label => ({
-            _id: label._id.toString(),
-            serviceName: label.serviceName,
-            charge: {
-              priceWithoutVAT: (parseFloat(label.charge.amount) * COMMISSION_PERCENTAGE).toFixed(2),
-              VAT: '0.0',
-              total: (parseFloat(label.charge.amount) * COMMISSION_PERCENTAGE).toFixed(2),
-            },
-            createdAt: label.createdAt,
-            status: label.status,
-            trackingNumbers: label.trackingNumbers,
-            orderNumber: label.orderNumber,
-            file: generateLabelFileUrl(label._id.toString())
-          }));
+        const updateLabels = labels.map(label => customizeLabel(label));
 
         return updateLabels;
       }
@@ -109,6 +114,7 @@ export const createLabelForShipment = async (payload: LabelPayloadType, userId: 
       const { amount, currency } = total_charge
 
       const localLabelDoc = await Label.create({
+        _id: await getNextSequenceId('labels'),
         userId,
         status,
         charge: {
@@ -128,20 +134,7 @@ export const createLabelForShipment = async (payload: LabelPayloadType, userId: 
 
       const localLabel = localLabelDoc.toObject();
 
-      return {
-        _id: localLabel._id.toString(),
-        serviceName: localLabel.serviceName,
-        charge: {
-          priceWithoutVAT: (parseFloat(localLabel.charge.amount) * COMMISSION_PERCENTAGE).toFixed(2),
-          VAT: '0.0',
-          total: (parseFloat(localLabel.charge.amount) * COMMISSION_PERCENTAGE).toFixed(2),
-        },
-        createdAt: localLabel.createdAt,
-        status: localLabel.status,
-        trackingNumbers: localLabel.trackingNumbers,
-        orderNumber: localLabel.orderNumber,
-        file: generateLabelFileUrl(localLabel._id.toString())
-      } as any;
+      return customizeLabel(localLabel) as unknown as Omit<typeof Label, 'file'>
     }
   } catch (error) {
     console.log((error as any).message);

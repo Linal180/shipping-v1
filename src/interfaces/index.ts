@@ -1,5 +1,6 @@
 import { Request } from "express"
 
+export type TableName = 'users' | 'labels'
 export interface GetRatesResponseType {
   meta: Meta
   data: Rate
@@ -377,4 +378,17 @@ export type TrackingResponse = CreateTracking & {
 export type CreateTrackingCustomFieldsPayload = {
   product_name: string
   product_price: string
+}
+
+export type BaseLabel =  {
+  _id: { toString(): string };
+  serviceName: string;
+  charge: {
+    amount?: string;
+    currency?: string;
+  };
+  createdAt: Date;
+  status: string;
+  trackingNumbers: string[];
+  orderNumber?: string;
 }

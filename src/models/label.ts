@@ -28,6 +28,7 @@ const fileSchema = new mongoose.Schema({
 
 const labelSchema = new mongoose.Schema(
 	{
+		_id: Number,
 		externalId: {
 			type: String,
 			required: true,
