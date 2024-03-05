@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { CustomRequest, GetAftershipRatesType, LabelPayloadType } from '../interfaces';
-import { getRates as getServiceRates,  createLabelForShipment, getUserLabels, getPDFFile} from './shipping.service';
+import { getRates as getServiceRates,  createLabelForShipment, getUserLabels, getPDFFile, getSingleLabel} from './shipping.service';
 
 export const getFile = async (req: Request, res: Response) => {
   try {
@@ -48,6 +48,18 @@ export const createLabel = async (req: CustomRequest, res: Response) => {
     res.status(500).send("Failed to get rates");
   }
 }
+
+export const getLabel = async (req: Request, res: Response) => {
+  try {
+    const labels = await getSingleLabel(req)
+
+    res.json(labels);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Failed to get rates");
+  }
+}
+
 
 export const getLabels = async (req: CustomRequest, res: Response) => {
   try {
