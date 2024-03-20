@@ -5,7 +5,7 @@ import { Request } from 'express'
 import { customizeLabel, generateLabelFileUrl, getNextSequenceId } from '../lib';
 import { COMMISSION_PERCENTAGE } from '../constants';
 import { createLabel, getAftershipRates } from "../aftershipService";
-import { CustomRequest, GetAftershipRatesType, LabelPayloadType } from "../interfaces";
+import { CustomRequest, GetAftershipRatesType, GetTrackingServiceResponse, LabelPayloadType } from "../interfaces";
 
 export const getPDFFile = async (id: string) => {
   try {
@@ -35,7 +35,8 @@ export const getRates = async (shipment: GetAftershipRatesType) => {
 
     const parsedRates = rates.map(rate => {
       return {
-        ServiceName: rate.service_name,
+        serviceName: rate.service_name,
+        serviceType: rate.service_type,
         charges: {
           weight: rate.charge_weight,
           perUnit: {
@@ -66,6 +67,47 @@ export const getSingleLabel = async (req: Request) => {
     }
 
     return null;
+  } catch (error) {
+    console.log((error as any).message);
+    return null
+  }
+};
+
+export const getLabelTracking = async (req: Request): Promise<GetTrackingServiceResponse> => {
+  try {
+    const { params: { tracking } } = req || {};
+
+    if(tracking){
+      const label = await Label.findOne({ trackingNumbers: tracking })
+
+      if(label){
+        return {
+          status: 200, message: "Tracking successfully found",
+          tracking: {
+            shipment_created: new Date().toISOString(),
+            picked_up: new Date().toISOString(),
+            departed_from_facility: new Date().toISOString(),
+            arrived_at_facility: new Date().toISOString(),
+            at_departure_hub: true,
+            in_transit:  false,
+            at_arrival_hub: false,
+            delivery_in_progress: true,
+            delivery_exception: "",
+            delivered: false,
+            unknown: "****"
+          }
+        }
+      }
+
+      return {
+        status: 404, message: "Tracking number not found", tracking: null
+      }
+    }
+
+    return {
+      status: 400, message: "Missing tracking number", tracking: null
+    }
+
   } catch (error) {
     console.log((error as any).message);
     return null
@@ -109,22 +151,22 @@ export const createLabelForShipment = async (payload: LabelPayloadType, userId: 
 
     if (label) {
       const { id, files, rate, ship_date, status, tracking_numbers, shipper_account, order_id, order_number } = label
-      const { service_name, service_type, total_charge } = rate
+      const { service_name, service_type, total_charge } = rate || {}
       const { label: { file_type, paper_size, url } = {} } = files
-      const { amount, currency } = total_charge
+      const { amount, currency } = total_charge || {}
 
       const localLabelDoc = await Label.create({
         _id: await getNextSequenceId('labels'),
         userId,
         status,
         charge: {
-          amount: (amount * COMMISSION_PERCENTAGE).toFixed(2),
-          currency
+          amount: ((amount ?? 1) * COMMISSION_PERCENTAGE).toFixed(2),
+          currency: currency ?? 'usd'
         },
         externalId: id,
         file: { fileType: file_type, paperSize: paper_size, url },
-        serviceName: service_name,
-        serviceType: service_type,
+        serviceName: service_name || '',
+        serviceType: service_type || '',
         shipDate: ship_date,
         shipperAccount: shipper_account,
         trackingNumbers: tracking_numbers,
