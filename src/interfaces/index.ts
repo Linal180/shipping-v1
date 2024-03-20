@@ -392,3 +392,23 @@ export type BaseLabel =  {
   trackingNumbers: string[];
   orderNumber?: string;
 }
+
+export type LabelTracking = {
+  shipment_created: string;
+  picked_up: string;
+  departed_from_facility: string;
+  arrived_at_facility: string;
+  at_departure_hub: boolean;
+  in_transit:  boolean;
+  at_arrival_hub: boolean;
+  delivery_in_progress: boolean;
+  delivery_exception: string;
+  delivered: boolean;
+  unknown: string;
+}
+
+export type GetTrackingServiceResponse = {
+  status: number,
+  message: string;
+  tracking: LabelTracking | null
+}

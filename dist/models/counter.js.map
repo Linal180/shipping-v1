@@ -1,0 +1,1 @@
+{"version":3,"file":"counter.js","sourceRoot":"","sources":["../../src/models/counter.ts"],"names":[],"mappings":";;;;;AAAA,+DAA+D;AAC/D,wDAAgC;AAEhC,MAAM,aAAa,GAAG,IAAI,kBAAQ,CAAC,MAAM,CAAC;IACtC,GAAG,EAAE,MAAM,EAAE,qEAAqE;IAClF,GAAG,EAAE;QACD,IAAI,EAAE,MAAM;QACZ,OAAO,EAAE,CAAC;KACb;CACJ,CAAC,CAAC;AAEH,kBAAe,kBAAQ,CAAC,KAAK,CAAC,SAAS,EAAE,aAAa,CAAC,CAAC"}

@@ -69,3 +69,9 @@ export const customizeLabel = <T extends BaseLabel>(label: T) => {
     file: generateLabelFileUrl(label._id.toString()) // Ensure generateLabelFileUrl is defined somewhere
   };
 };
+
+export const getShipperAccount = () => {
+    return {
+      id: process.env.AFTER_SHIP_SHIPPER_ACCOUNT || "9f115bc2-7422-47ce-a8e9-aa3b3cd91b80"
+    }
+}
