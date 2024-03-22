@@ -46,13 +46,13 @@ const getAftershipRates = (inputs) => __awaiter(void 0, void 0, void 0, function
 });
 exports.getAftershipRates = getAftershipRates;
 const createLabel = (inputs) => __awaiter(void 0, void 0, void 0, function* () {
-    const { from, is_document, paper_size, parcels, return_shipment, service_type, to, shipperAccount } = inputs;
+    const { from, is_document, paper_size, parcels, return_shipment, service_code, to, shipper_account } = inputs;
     const body = {
         return_shipment,
         is_document,
-        service_type,
+        service_type: service_code,
         paper_size,
-        shipper_account: { id: shipperAccount },
+        shipper_account: { id: shipper_account },
         references: [
             "refernce1"
         ],

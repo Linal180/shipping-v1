@@ -42,7 +42,7 @@ const createLabel = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     try {
         const user = req.user;
         const labelDetails = req.body;
-        if (!labelDetails.from || !labelDetails.to || !labelDetails.parcels || !labelDetails.service_type) {
+        if (!labelDetails.from || !labelDetails.to || !labelDetails.parcels || !labelDetails.service_code) {
             return res.status(400).send("Shipment details are incomplete.");
         }
         const rates = yield (0, shipping_service_1.createLabelForShipment)(labelDetails, user.userId);

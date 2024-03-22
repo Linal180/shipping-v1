@@ -45,7 +45,7 @@ const getRates = (shipment) => __awaiter(void 0, void 0, void 0, function* () {
         const parsedRates = rates.map(rate => {
             return {
                 serviceName: rate.service_name,
-                serviceType: rate.service_type,
+                serviceCode: rate.service_type,
                 charges: {
                     weight: rate.charge_weight,
                     perUnit: {

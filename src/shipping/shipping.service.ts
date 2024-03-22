@@ -36,7 +36,7 @@ export const getRates = async (shipment: GetAftershipRatesType) => {
     const parsedRates = rates.map(rate => {
       return {
         serviceName: rate.service_name,
-        serviceType: rate.service_type,
+        serviceCode: rate.service_type,
         charges: {
           weight: rate.charge_weight,
           perUnit: {

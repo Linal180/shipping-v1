@@ -36,7 +36,7 @@ export const createLabel = async (req: CustomRequest, res: Response) => {
     const user = req.user;
     const labelDetails = req.body as LabelPayloadType;
 
-    if (!labelDetails.from || !labelDetails.to || !labelDetails.parcels || !labelDetails.service_type) {
+    if (!labelDetails.from || !labelDetails.to || !labelDetails.parcels || !labelDetails.service_code) {
       return res.status(400).send("Shipment details are incomplete.");
     }
 

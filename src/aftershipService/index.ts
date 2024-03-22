@@ -48,15 +48,15 @@ export const getAftershipRates = async (inputs: GetAftershipRatesType): Promise<
 
 export const createLabel = async (inputs: LabelPayloadType): Promise<NewLabel | null> => {
   const {
-    from, is_document, paper_size, parcels, return_shipment, service_type, to, shipperAccount
+    from, is_document, paper_size, parcels, return_shipment, service_code, to, shipper_account
   } = inputs
 
   const body: CreateLabelPayload = {
     return_shipment,
     is_document,
-    service_type,
+    service_type: service_code,
     paper_size,
-    shipper_account: { id: shipperAccount },
+    shipper_account: { id: shipper_account },
     references: [
       "refernce1"
     ],
