@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getShipperAccount = exports.customizeLabel = exports.getNextSequenceId = exports.addCounterRecord = exports.generateLabelFileUrl = exports.generateRandomNumbers = exports.comparePassword = exports.hashPassword = void 0;
+exports.getAllShipperAccount = exports.getUspsShipperAccount = exports.getChronoPostShipperAccount = exports.getShipperAccount = exports.customizeLabel = exports.getNextSequenceId = exports.addCounterRecord = exports.generateLabelFileUrl = exports.generateRandomNumbers = exports.comparePassword = exports.hashPassword = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const counter_1 = __importDefault(require("../models/counter"));
 const constants_1 = require("../constants");
@@ -82,4 +82,23 @@ const getShipperAccount = () => {
     };
 };
 exports.getShipperAccount = getShipperAccount;
+const getChronoPostShipperAccount = () => {
+    return {
+        id: "59c9757332f44f4d9132f5b08aae598f"
+    };
+};
+exports.getChronoPostShipperAccount = getChronoPostShipperAccount;
+const getUspsShipperAccount = () => {
+    return {
+        id: "9f115bc2-7422-47ce-a8e9-aa3b3cd91b80"
+    };
+};
+exports.getUspsShipperAccount = getUspsShipperAccount;
+const getAllShipperAccount = () => {
+    return [
+        (0, exports.getChronoPostShipperAccount)(),
+        (0, exports.getUspsShipperAccount)()
+    ];
+};
+exports.getAllShipperAccount = getAllShipperAccount;
 //# sourceMappingURL=index.js.map

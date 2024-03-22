@@ -30,7 +30,7 @@ const axiosTracking = axios_1.default.create({
 const getAftershipRates = (inputs) => __awaiter(void 0, void 0, void 0, function* () {
     const { from, parcels, to, returnTo } = inputs;
     const getRatesBody = {
-        shipper_accounts: [(0, lib_1.getShipperAccount)()],
+        shipper_accounts: (0, lib_1.getAllShipperAccount)(),
         shipment: Object.assign(Object.assign({ ship_from: from, ship_to: to, parcels }, ((returnTo === null || returnTo === void 0 ? void 0 : returnTo.contact_name) ? { return_to: returnTo } : null)), { delivery_instructions: "handle with care" })
     };
     try {
@@ -46,14 +46,13 @@ const getAftershipRates = (inputs) => __awaiter(void 0, void 0, void 0, function
 });
 exports.getAftershipRates = getAftershipRates;
 const createLabel = (inputs) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const { from, is_document, paper_size, parcels, return_shipment, service_type, to } = inputs;
+    const { from, is_document, paper_size, parcels, return_shipment, service_type, to, shipperAccount } = inputs;
     const body = {
         return_shipment,
         is_document,
         service_type,
         paper_size,
-        shipper_account: (0, lib_1.getShipperAccount)(),
+        shipper_account: { id: shipperAccount },
         references: [
             "refernce1"
         ],
@@ -71,7 +70,6 @@ const createLabel = (inputs) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { data } = yield axiosClient.post('/labels', JSON.stringify(body));
         const { data: createLabelData } = data;
-        console.log((_a = data === null || data === void 0 ? void 0 : data.meta) === null || _a === void 0 ? void 0 : _a.details, ":::::::::::::::::::");
         return createLabelData ? createLabelData : null;
     }
     catch (error) {
