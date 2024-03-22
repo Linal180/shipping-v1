@@ -75,3 +75,22 @@ export const getShipperAccount = () => {
       id: process.env.AFTER_SHIP_SHIPPER_ACCOUNT || "9f115bc2-7422-47ce-a8e9-aa3b3cd91b80"
     }
 }
+
+export const getChronoPostShipperAccount = () => {
+  return {
+    id: "59c9757332f44f4d9132f5b08aae598f"
+  }
+}
+
+export const getUspsShipperAccount = () => {
+  return {
+    id: "9f115bc2-7422-47ce-a8e9-aa3b3cd91b80"
+  }
+}
+
+export const getAllShipperAccount = () => {
+  return [
+    getChronoPostShipperAccount(),
+    getUspsShipperAccount()
+  ]
+}

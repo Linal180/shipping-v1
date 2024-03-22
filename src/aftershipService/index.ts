@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { generateRandomNumbers, getShipperAccount } from '../lib';
+import { generateRandomNumbers, getAllShipperAccount } from '../lib';
 import {
-  CreateLabelPayload, CreateLabelResponse, CreateTrackingDataResponse, CreateTrackingPayload,
-  CreateTrackingResponse, GetAftershipRatesPayloadType, GetAftershipRatesType,
+  CreateLabelPayload, CreateLabelResponse, GetAftershipRatesPayloadType, GetAftershipRatesType,
   GetRatesResponseType, LabelPayloadType, NewLabel, Rate2
 } from '../interfaces';
 
@@ -25,7 +24,7 @@ export const getAftershipRates = async (inputs: GetAftershipRatesType): Promise<
   const { from, parcels, to, returnTo } = inputs
 
   const getRatesBody: GetAftershipRatesPayloadType = {
-    shipper_accounts: [getShipperAccount()],
+    shipper_accounts: getAllShipperAccount(),
     shipment: {
       ship_from: from,
       ship_to: to,
@@ -49,7 +48,7 @@ export const getAftershipRates = async (inputs: GetAftershipRatesType): Promise<
 
 export const createLabel = async (inputs: LabelPayloadType): Promise<NewLabel | null> => {
   const {
-    from, is_document, paper_size, parcels, return_shipment, service_type, to
+    from, is_document, paper_size, parcels, return_shipment, service_type, to, shipperAccount
   } = inputs
 
   const body: CreateLabelPayload = {
@@ -57,7 +56,7 @@ export const createLabel = async (inputs: LabelPayloadType): Promise<NewLabel | 
     is_document,
     service_type,
     paper_size,
-    shipper_account: getShipperAccount(),
+    shipper_account: { id: shipperAccount },
     references: [
       "refernce1"
     ],
@@ -76,7 +75,7 @@ export const createLabel = async (inputs: LabelPayloadType): Promise<NewLabel | 
   try {
     const { data }  = await axiosClient.post<CreateLabelResponse>('/labels', JSON.stringify(body) )
     const { data: createLabelData } = data
-    console.log((data as any)?.meta?.details, ":::::::::::::::::::")
+
     return createLabelData ? createLabelData : null;
   } catch (error) {
     console.log("*********** Error in getAftershipRates ***********")

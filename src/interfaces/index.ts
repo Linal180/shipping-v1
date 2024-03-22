@@ -135,6 +135,7 @@ export type GetAftershipRatesType = {
 }
 
 export type LabelPayloadType = GetAftershipRatesType & {
+  shipperAccount: string;
   return_shipment: boolean
   is_document: boolean
   service_type: string
