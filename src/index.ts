@@ -3,6 +3,7 @@ import cors from "cors";
 import express from 'express';
 import authRoutes from './routes/auth';
 import shippingRoutes from './routes/shipping';
+import Dhl from './routes/dhl';
 import dbConnection from './configuration/database';
 
 config()
@@ -17,6 +18,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/shipping', shippingRoutes);
+app.use('/dhl', Dhl);
 
 app.get('/', (req, res) => {
   res.send('Hello Shipping World!');
