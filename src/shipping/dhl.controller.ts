@@ -1,8 +1,6 @@
 // src/controllers/dhlController.ts
 import { Request, Response } from 'express';
-import { getDhlRates, createDhlLabel } from '../axios/dhl-express';
-
-import { getRates } from '../axios/dhl-express-api';
+import { getDhlRates, createDhlLabel, getRates } from '../axios/dhl-express';
 
 interface DHLRateRequestParams {
   accountNumber: string;
@@ -36,7 +34,7 @@ export const getDhlRatesController = async (req: Request, res: Response) => {
   const headers = req.headers as unknown as DHLRateRequestHeaders;
 
   try {
-    const rates = await getDhlRates(params, headers);
+    const rates = await getDhlRates(params);
     res.json(rates);
   } catch (error) {
     console.error(error);
@@ -49,7 +47,7 @@ export const createDhlLabelController = async (req: Request, res: Response) => {
   const headers = req.headers as unknown as DHLRateRequestHeaders;
 
   try {
-    const label = await createDhlLabel(params, headers);
+    const label = await createDhlLabel(params);
     res.json(label);
   } catch (error) {
     console.error(error);

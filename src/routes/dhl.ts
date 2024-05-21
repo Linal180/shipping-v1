@@ -5,7 +5,7 @@ import { getDhlRatess } from '../shipping/dhl.controller';
 
 const router = Router();
 
-router.post('/rates', getDhlRatesController);
+router.get('/rates', getDhlRatesController);
 router.post('/labels', createDhlLabelController);
 router.post('/dhl/rates', getDhlRatess);
 
