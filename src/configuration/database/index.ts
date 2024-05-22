@@ -5,8 +5,7 @@ const dbConnection = async () => {
         const databaseUrl = process.env.DATABASE_URL;
         const databaseName = process.env.DATABASE_NAME;
 
-        console.log(`${databaseUrl}${databaseName}?retryWrites=true&w=majority`)
-        const connection = await mongoose.connect(`${databaseUrl}${databaseName}?retryWrites=true&w=majority`);
+        const connection = await mongoose.connect(`${databaseUrl}/${databaseName}?retryWrites=true&w=majority`);
         if (connection) {
             console.log("Database connection established");
         } else {

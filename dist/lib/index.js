@@ -12,10 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllShipperAccount = exports.getUspsShipperAccount = exports.getChronoPostShipperAccount = exports.getShipperAccount = exports.customizeLabel = exports.getNextSequenceId = exports.addCounterRecord = exports.generateLabelFileUrl = exports.generateRandomNumbers = exports.comparePassword = exports.hashPassword = void 0;
+exports.getDHLRateGenericResponse = exports.getCurrentDate = exports.printLogs = exports.getDHLHeaders = exports.getAllShipperAccount = exports.getUspsShipperAccount = exports.getChronoPostShipperAccount = exports.getShipperAccount = exports.customizeLabel = exports.getNextSequenceId = exports.addCounterRecord = exports.generateLabelFileUrl = exports.generateRandomNumbers = exports.comparePassword = exports.hashPassword = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const dotenv_1 = require("dotenv");
 const counter_1 = __importDefault(require("../models/counter"));
 const constants_1 = require("../constants");
+(0, dotenv_1.config)(); // To load envs ASAP
 const hashPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const saltRounds = 10;
@@ -101,4 +103,74 @@ const getAllShipperAccount = () => {
     ];
 };
 exports.getAllShipperAccount = getAllShipperAccount;
+const getDHLHeaders = () => {
+    const username = process.env.DHL_USERNAME;
+    const password = process.env.DHL_PASSWORD;
+    const hash = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': hash
+    };
+};
+exports.getDHLHeaders = getDHLHeaders;
+const printLogs = (methodName, error) => {
+    console.log(`*************** Error in ${methodName} **************`);
+    console.log("Error: ", error);
+    console.log("******************************************************");
+};
+exports.printLogs = printLogs;
+const getCurrentDate = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+exports.getCurrentDate = getCurrentDate;
+const getDHLRateGenericResponse = (rates) => {
+    const { productName, totalPrice, weight, totalPriceBreakdown, detailedPriceBreakdown } = rates || {};
+    const { priceCurrencies, totalSum } = totalPrice.reduce((accumulator, currentItem) => {
+        accumulator.totalSum += currentItem.price;
+        if (currentItem.priceCurrency) {
+            accumulator.priceCurrencies += accumulator.priceCurrencies ? `, ${currentItem.priceCurrency}` : currentItem.priceCurrency;
+        }
+        return accumulator;
+    }, { totalSum: 0, priceCurrencies: '' });
+    let taxSum = 0;
+    let basePriceSum = 0;
+    totalPriceBreakdown.forEach(item => {
+        if (item.priceBreakdown && item.priceBreakdown.length) {
+            item.priceBreakdown.forEach(subItem => {
+                basePriceSum += subItem.price;
+            });
+        }
+    });
+    detailedPriceBreakdown.forEach(item => {
+        var _a;
+        if (item.breakdown) {
+            (_a = item === null || item === void 0 ? void 0 : item.breakdown) === null || _a === void 0 ? void 0 : _a.forEach(subItem => {
+                if (subItem.priceBreakdown) {
+                    subItem.priceBreakdown.forEach(priceItem => {
+                        taxSum += priceItem.price;
+                    });
+                }
+            });
+        }
+    });
+    return {
+        serviceName: productName,
+        totalPrice: {
+            currency: priceCurrencies || '',
+            price: totalSum || 0
+        },
+        weight: {
+            unit: weight.unitOfMeasurement,
+            value: weight.provided
+        },
+        tax: {
+            amount: parseFloat((totalSum - basePriceSum).toFixed(2))
+        },
+    };
+};
+exports.getDHLRateGenericResponse = getDHLRateGenericResponse;
 //# sourceMappingURL=index.js.map
