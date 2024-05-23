@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
+
+import User from '../../models/user';
 import { printLogs } from "../../lib";
-import { GetRatesV2Body } from "../../interfaces";
-import { getCarrierRates } from "./service";
+import { createCarrierShipment, getCarrierRates } from "./service";
+import { CustomRequest, GetRatesV2Body } from "../../interfaces";
 
 export const getRates = async (req: Request, res: Response) => {
   const body = req.body;
@@ -14,5 +16,24 @@ export const getRates = async (req: Request, res: Response) => {
     printLogs(getRates.name, error);
 
     res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+export const createShipment = async (req: CustomRequest, res: Response) => {
+  const { user } = req || {}
+
+  try {
+    const currentUser = await User.findById(user.userId)
+
+    if (!currentUser) {
+      res.status(403).json({ message: "This action is forbidden for you" });
+      return
+    }
+
+    const data = await createCarrierShipment(req);
+
+    res.status(201).json({ message: "Shipment created and save successfully!", data })
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

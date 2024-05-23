@@ -516,3 +516,85 @@ export type TGetRateReponse = {
     amount: number
   }
 }
+
+export type ShippingAddress = {
+  postalCode: string 
+  cityName: string 
+  countryCode: string 
+  addressLine1: string 
+}
+
+export type ShipmentContact = {
+  email: string;
+  phone: string;
+  fullName: string
+  address: ShipAddress
+  companyName: string
+}
+
+export type ShipmentDimensions = {
+  width: string;
+  length: string;
+  height: string;
+}
+
+export type ShipmentPackage = {
+  weight: string;
+  description: string;
+  dimensions: ShipmentDimensions
+}
+
+export type ShipmentLineItem = {
+  number: string
+  description: string
+  price: string
+  quantity: {
+    value: string
+    unitOfMeasurement: string
+  }
+  manufacturerCountry: string
+  weight: {
+    netValue: string
+    grossValue: string
+  }
+}
+
+export type ShipmentContent = {
+  packages: ShipmentPackage[];
+  lineItems: ShipmentLineItem[]
+  isCustomsDeclarable: string 
+  declaredValue: string 
+  declaredValueCurrency: string 
+  description: string 
+  unitOfMeasurement: string 
+
+}
+
+export type TCreateShipmentV2Body = CarrierType & {
+  shipmentDate: string;
+  sender: ShipmentContact;
+  receiver: ShipmentContact;
+  content: ShipmentContent
+  shipmentNotification: Array<{
+    type: string;
+    email: string;
+    message: string;
+  }>
+}
+
+export type TCreateShipmentDHLResponse = {
+    shipmentTrackingNumber: string
+    trackingUrl: string
+    packages: Array<{
+      referenceNumber: number
+      trackingNumber: string
+      trackingUrl: string
+    }>
+    documents: Array<{
+      imageFormat: string
+      content: string
+      typeCode: string
+    }>
+  }  
+}
+

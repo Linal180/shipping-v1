@@ -1,6 +1,6 @@
 import axios from "axios";
-import { getCurrentDate, getDHLHeaders, printLogs } from "../../lib";
-import { GetRatesV2Body, TGetDHLRatesResponse } from "../../interfaces";
+import { createDHLGenericShipmentPayload, getCurrentDate, getDHLHeaders, printLogs } from "../../lib";
+import { GetRatesV2Body, TCreateShipmentDHLResponse, TCreateShipmentV2Body, TGetDHLRatesResponse } from "../../interfaces";
 
 const dhl = axios.create({
   baseURL: process.env.DHL_API_ENDPOINT || 'https://express.api.dhl.com/mydhlapi',
@@ -35,5 +35,17 @@ export const getRates = async (params: Omit<GetRatesV2Body, 'carrier'>) => {
     return products[0]
   } catch (error) {
     printLogs(`DHL ${getRates.name}`, error)
+  }
+}
+
+export const createDHLShipment = async (body: TCreateShipmentV2Body) => {
+  const shipmentPayload = createDHLGenericShipmentPayload(body)
+
+  try {
+    const res = await dhl.post<TCreateShipmentDHLResponse>('/shipments', shipmentPayload)
+
+    return res.data
+  } catch (error) {
+    printLogs(`DHL ${createDHLShipment.name}`, error)
   }
 }

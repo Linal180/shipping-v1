@@ -1,8 +1,9 @@
 import bcrypt from "bcrypt";
 import { config } from 'dotenv'
 import Counter from "../models/counter";
-import { BaseLabel, TGetDHLRatesResponse, TGetRateReponse, TableName } from "../interfaces";
+import { BaseLabel, TCreateShipmentV2Body, TGetDHLRatesResponse, TGetRateReponse, TableName } from "../interfaces";
 import { COMMISSION_PERCENTAGE } from "../constants";
+import moment from "moment-timezone";
 
 config() // To load envs ASAP
 
@@ -139,9 +140,9 @@ export const getDHLRateGenericResponse = (rates: TGetDHLRatesResponse['products'
 
   let taxSum = 0;
   let basePriceSum = 0;
-  
+
   totalPriceBreakdown.forEach(item => {
-    if(item.priceBreakdown && item.priceBreakdown.length){
+    if (item.priceBreakdown && item.priceBreakdown.length) {
       item.priceBreakdown.forEach(subItem => {
         basePriceSum += subItem.price
       })
@@ -175,4 +176,77 @@ export const getDHLRateGenericResponse = (rates: TGetDHLRatesResponse['products'
       amount: parseFloat((totalSum - basePriceSum).toFixed(2))
     },
   }
+}
+
+export const getDateTimeForShipment = (date: string) => {
+  const timeStr = "12:00:00";
+  const timezoneOffset = "+01:00";
+  const combinedStr = `${date}T${timeStr}${timezoneOffset}`;
+
+  const dateTime = moment.parseZone(combinedStr);
+
+  return dateTime.format("YYYY-MM-DDTHH:mm:ss [GMT]Z");
+}
+
+export const createDHLGenericShipmentPayload = (payload: TCreateShipmentV2Body) => {
+  const { receiver, sender, shipmentDate, shipmentNotification, content } = payload || {};
+  const { address, ...senderInfo } = sender
+  const { address: receiverAddress, ...receiverInfo } = receiver
+
+  const {
+    declaredValue, declaredValueCurrency, description, isCustomsDeclarable, lineItems, packages
+  } = content || {}
+
+  return JSON.stringify({
+    plannedShippingDateAndTime: getDateTimeForShipment(shipmentDate),
+    pickup: {
+      isRequested: false
+    },
+    getRateEstimates: true,
+    productCode: "P",
+    accounts: [
+      {
+        typeCode: "shipper",
+        number: process.env.DHL_ACCOUNT_NUMBER
+      }
+    ],
+    customerDetails: {
+      shipperDetails: {
+        postalAddress: address,
+        contactInformation: senderInfo
+      },
+      receiverDetails: {
+        postalAddress: receiverAddress,
+        contactInformation: receiverInfo
+      }
+    },
+    content: {
+      packages,
+      incoterm: "DAP",
+      exportDeclaration: {
+        lineItems,
+        invoice: {
+          number: "1333343",
+          date: "2022-10-22"
+        },
+        destinationPortName: "New York Port",
+        exportReasonType: "permanent"
+      },
+      isCustomsDeclarable: isCustomsDeclarable || true,
+      declaredValue: declaredValue || 100,
+      declaredValueCurrency: declaredValueCurrency || 'USD',
+      description: description || '',
+      unitOfMeasurement: "metric"
+
+    },
+    shipmentNotification: shipmentNotification.map(notification => {
+      const { email, message, type } = notification
+
+      return {
+        typeCode: type || '',
+        receiverId: email || '',
+        bespokeMessage: message || ''
+      }
+    })
+  })
 }
