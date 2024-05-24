@@ -1,17 +1,22 @@
 import axios from 'axios'
+import { Request } from 'express'
+
 import User from '../models/user';
 import Label from '../models/label';
-import { Request } from 'express'
-import { customizeLabel, generateLabelFileUrl, getNextSequenceId } from '../lib';
+import Shipment from '../models/shipment';
+
 import { COMMISSION_PERCENTAGE } from '../constants';
+import { customizeLabel, getNextSequenceId } from '../lib';
 import { createLabel, getAftershipRates } from "../aftershipService";
-import { CustomRequest, GetAftershipRatesType, GetTrackingServiceResponse, LabelPayloadType } from "../interfaces";
+import {
+  CustomRequest, GetAftershipRatesType, GetTrackingServiceResponse, LabelPayloadType
+} from "../interfaces";
 
 export const getPDFFile = async (id: string) => {
   try {
     const url = await getLabelFile(id);
 
-    if(url){
+    if (url) {
       const response = await axios({
         method: 'get',
         url,
@@ -28,6 +33,7 @@ export const getPDFFile = async (id: string) => {
     return null
   }
 };
+
 
 export const getRates = async (shipment: GetAftershipRatesType) => {
   try {
@@ -60,10 +66,10 @@ export const getSingleLabel = async (req: Request) => {
   try {
     const { params: { id } } = req || {};
 
-    if(id){
+    if (id) {
       const label = await Label.findOne({ _id: id })
 
-      if(label) return customizeLabel(label);
+      if (label) return customizeLabel(label);
     }
 
     return null;
@@ -77,10 +83,10 @@ export const getLabelTracking = async (req: Request): Promise<GetTrackingService
   try {
     const { params: { tracking } } = req || {};
 
-    if(tracking){
+    if (tracking) {
       const label = await Label.findOne({ trackingNumbers: tracking })
 
-      if(label){
+      if (label) {
         return {
           status: 200, message: "Tracking successfully found",
           tracking: {
@@ -89,7 +95,7 @@ export const getLabelTracking = async (req: Request): Promise<GetTrackingService
             departed_from_facility: new Date().toISOString(),
             arrived_at_facility: new Date().toISOString(),
             at_departure_hub: true,
-            in_transit:  false,
+            in_transit: false,
             at_arrival_hub: false,
             delivery_in_progress: true,
             delivery_exception: "",
@@ -119,10 +125,10 @@ export const getUserLabels = async (req: CustomRequest) => {
     const { user: { userId }, query } = req || {};
     const { page, limit } = query || {}
 
-    if(userId){
+    if (userId) {
       const currentUser = await User.findOne({ _id: userId })
 
-      if(currentUser){
+      if (currentUser) {
         const pageNumber = parseInt(page as string ?? '1') || 1;
         const limitNumber = parseInt(limit as string ?? '10') || 10;
 
@@ -185,10 +191,10 @@ export const createLabelForShipment = async (payload: LabelPayloadType, userId: 
 };
 
 const getLabelFile = async (id: string): Promise<string> => {
-  if(id){
+  if (id) {
     const label = await Label.findOne({ _id: id }).exec()
 
-    if(label) {
+    if (label) {
       return label.file.url
     }
   }

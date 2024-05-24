@@ -3,7 +3,9 @@ import cors from "cors";
 import express from 'express';
 import authRoutes from './routes/auth';
 import shippingRoutes from './routes/shipping';
+import v2Routes from './routes/v2';
 import dbConnection from './configuration/database';
+import { authenticateToken } from './middlewares/auth';
 
 config()
 const app = express();
@@ -17,6 +19,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/shipping', shippingRoutes);
+app.use('/v2', authenticateToken, v2Routes);
 
 app.get('/', (req, res) => {
   res.send('Hello Shipping World!');

@@ -16,8 +16,8 @@ exports.createLabelForShipment = exports.getUserLabels = exports.getLabelTrackin
 const axios_1 = __importDefault(require("axios"));
 const user_1 = __importDefault(require("../models/user"));
 const label_1 = __importDefault(require("../models/label"));
-const lib_1 = require("../lib");
 const constants_1 = require("../constants");
+const lib_1 = require("../lib");
 const aftershipService_1 = require("../aftershipService");
 const getPDFFile = (id) => __awaiter(void 0, void 0, void 0, function* () {
     try {

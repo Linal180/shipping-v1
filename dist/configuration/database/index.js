@@ -17,8 +17,7 @@ const dbConnection = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const databaseUrl = process.env.DATABASE_URL;
         const databaseName = process.env.DATABASE_NAME;
-        console.log(`${databaseUrl}${databaseName}?retryWrites=true&w=majority`);
-        const connection = yield mongoose_1.default.connect(`${databaseUrl}${databaseName}?retryWrites=true&w=majority`);
+        const connection = yield mongoose_1.default.connect(`${databaseUrl}/${databaseName}?retryWrites=true&w=majority`);
         if (connection) {
             console.log("Database connection established");
         }

@@ -231,7 +231,7 @@ export type CustomRequest = Request & {
   user: CustomSession
 }
 
-export type CreateTrackingResponse =  {
+export type CreateTrackingResponse = {
   meta: CreateTrackingMetaResponse
   data: CreateTrackingDataResponse
 }
@@ -381,7 +381,7 @@ export type CreateTrackingCustomFieldsPayload = {
   product_price: string
 }
 
-export type BaseLabel =  {
+export type BaseLabel = {
   _id: { toString(): string };
   serviceName: string;
   charge: {
@@ -400,7 +400,7 @@ export type LabelTracking = {
   departed_from_facility: string;
   arrived_at_facility: string;
   at_departure_hub: boolean;
-  in_transit:  boolean;
+  in_transit: boolean;
   at_arrival_hub: boolean;
   delivery_in_progress: boolean;
   delivery_exception: string;
@@ -413,3 +413,188 @@ export type GetTrackingServiceResponse = {
   message: string;
   tracking: LabelTracking | null
 }
+
+// --------------------------------------------------------------------
+
+export type CarrierType = {
+  carrier: 'DHL' | 'UPS'
+}
+
+export type GetRatesV2Body = CarrierType & {
+  fromCountry: string
+  fromCity: string
+  toCountry: string
+  toCity: string
+  weight: string
+  length: string
+  height: string
+  width: string
+  shippingDate: string
+}
+
+export type TGetDHLRatesResponse = {
+  products: Array<{
+    productName: string
+    productCode: string
+    localProductCode: string
+    localProductCountryCode: string
+    networkTypeCode: string
+    isCustomerAgreement: boolean
+    weight: {
+      volumetric: number
+      provided: number
+      unitOfMeasurement: string
+    }
+    totalPrice: Array<{
+      currencyType: string
+      priceCurrency?: string
+      price: number
+    }>
+    totalPriceBreakdown: Array<{
+      currencyType: string
+      priceCurrency: string
+      priceBreakdown: Array<{
+        typeCode: string
+        price: number
+      }>
+    }>
+    detailedPriceBreakdown: Array<{
+      currencyType: string
+      priceCurrency: string
+      breakdown: Array<{
+        name: string
+        price?: number
+        priceBreakdown?: Array<{
+          priceType: string
+          typeCode: string
+          price: number
+          rate: number
+          basePrice: number
+        }>
+        serviceCode?: string
+        localServiceCode?: string
+        serviceTypeCode?: string
+        isCustomerAgreement?: boolean
+        isMarketedService?: boolean
+      }>
+    }>
+    pickupCapabilities: {
+      nextBusinessDay: boolean
+      localCutoffDateAndTime: string
+      GMTCutoffTime: string
+      pickupEarliest: string
+      pickupLatest: string
+      originServiceAreaCode: string
+      originFacilityAreaCode: string
+      pickupAdditionalDays: number
+      pickupDayOfWeek: number
+    }
+    deliveryCapabilities: {
+      deliveryTypeCode: string
+      estimatedDeliveryDateAndTime: string
+      destinationServiceAreaCode: string
+      destinationFacilityAreaCode: string
+      deliveryAdditionalDays: number
+      deliveryDayOfWeek: number
+      totalTransitDays: number
+    }
+    pricingDate: string
+  }>
+}
+
+export type TGetRateResponse = {
+  serviceName: string;
+  weight: {
+    value: number;
+    unit: string;
+  }
+  totalPrice: {
+    currency: string;
+    price: number;
+  }
+  tax: {
+    amount: number
+  }
+}
+
+export type ShippingAddress = {
+  postalCode: string
+  cityName: string
+  countryCode: string
+  addressLine1: string
+}
+
+export type ShipmentContact = {
+  email: string;
+  phone: string;
+  fullName: string
+  address: ShipAddress
+  companyName: string
+}
+
+export type ShipmentDimensions = {
+  width: string;
+  length: string;
+  height: string;
+}
+
+export type ShipmentPackage = {
+  weight: string;
+  description: string;
+  dimensions: ShipmentDimensions
+}
+
+export type ShipmentLineItem = {
+  number: string
+  description: string
+  price: string
+  quantity: {
+    value: string
+    unitOfMeasurement: string
+  }
+  manufacturerCountry: string
+  weight: {
+    netValue: string
+    grossValue: string
+  }
+}
+
+export type ShipmentContent = {
+  packages: ShipmentPackage[];
+  lineItems: ShipmentLineItem[]
+  isCustomsDeclarable: string
+  declaredValue: string
+  declaredValueCurrency: string
+  description: string
+  unitOfMeasurement: string
+
+}
+
+export type TCreateShipmentV2Body = CarrierType & {
+  shipmentDate: string;
+  sender: ShipmentContact;
+  receiver: ShipmentContact;
+  content: ShipmentContent
+  shipmentNotification: Array<{
+    type: string;
+    email: string;
+    message: string;
+  }>
+}
+
+export type TCreateShipmentDHLResponse = {
+  shipmentTrackingNumber: string
+  trackingUrl: string
+  packages: Array<{
+    referenceNumber: number
+    trackingNumber: string
+    trackingUrl: string
+  }>
+  documents: Array<{
+    imageFormat: string
+    content: string
+    typeCode: string
+  }>
+}
+
+
