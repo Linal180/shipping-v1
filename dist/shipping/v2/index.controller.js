@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.shipmentTracking = exports.shipmentDocumentByTracking = exports.shippingDoc = exports.userShipments = exports.allShipments = exports.createShipment = exports.getRates = void 0;
+exports.shipmentTracking = exports.shipmentDocumentByTracking = exports.shippingDoc = exports.userShipments = exports.singleShipment = exports.allShipments = exports.createShipment = exports.getRates = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const user_1 = __importDefault(require("../../models/user"));
@@ -57,6 +57,17 @@ const allShipments = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.allShipments = allShipments;
+const singleShipment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { params: { id } } = req;
+    try {
+        const { shipment, status } = yield (0, service_1.getShipment)(id);
+        res.status(status).json({ shipment });
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+exports.singleShipment = singleShipment;
 const userShipments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { page, shipments } = yield (0, service_1.getUserShipments)(req);
@@ -96,7 +107,7 @@ const shipmentDocumentByTracking = (req, res) => __awaiter(void 0, void 0, void 
     }
     try {
         const { message, status, documents } = yield (0, service_1.getShipmentDocumentByTracking)(req);
-        res.status(status).json({ message, documents });
+        res.status(status).json({ message, data: documents });
     }
     catch (error) {
         res.status(500).json({ message: error.message, documents: [] });

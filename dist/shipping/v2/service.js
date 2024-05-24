@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getShipmentTracking = exports.getShipmentDocumentByTracking = exports.getUserShipments = exports.getAllShipments = exports.createCarrierShipment = exports.getCarrierRates = void 0;
+exports.getShipmentTracking = exports.getShipmentDocumentByTracking = exports.getUserShipments = exports.getShipment = exports.getAllShipments = exports.createCarrierShipment = exports.getCarrierRates = void 0;
 const user_1 = __importDefault(require("../../models/user"));
 const shipment_1 = __importDefault(require("../../models/shipment"));
 const lib_1 = require("../../lib");
@@ -83,6 +83,24 @@ const getAllShipments = (req) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.getAllShipments = getAllShipments;
+const getShipment = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const shipment = yield shipment_1.default.findById(id)
+            .select('-documents -trackingUrl -packages')
+            .lean()
+            .exec();
+        return shipment ? {
+            shipment, status: 200
+        } : {
+            shipment: null, status: 404
+        };
+    }
+    catch (error) {
+        (0, lib_1.printLogs)(exports.getAllShipments.name, error);
+        return { shipment: null, status: 500 };
+    }
+});
+exports.getShipment = getShipment;
 const getUserShipments = (req) => __awaiter(void 0, void 0, void 0, function* () {
     var _e, _f;
     const { user: { userId }, query } = req || {};
@@ -94,7 +112,7 @@ const getUserShipments = (req) => __awaiter(void 0, void 0, void 0, function* ()
             const currentUser = yield user_1.default.findOne({ _id: userId });
             if (currentUser) {
                 const shipments = yield shipment_1.default.find({ userId })
-                    .select('-documents')
+                    .select('-documents -trackingUrl -packages')
                     .skip((pageNumber - 1) * limitNumber)
                     .limit(limitNumber)
                     .lean()
