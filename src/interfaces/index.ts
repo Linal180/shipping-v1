@@ -502,7 +502,7 @@ export type TGetDHLRatesResponse = {
   }>
 }
 
-export type TGetRateReponse = {
+export type TGetRateResponse = {
   serviceName: string;
   weight: {
     value: number;
@@ -518,10 +518,10 @@ export type TGetRateReponse = {
 }
 
 export type ShippingAddress = {
-  postalCode: string 
-  cityName: string 
-  countryCode: string 
-  addressLine1: string 
+  postalCode: string
+  cityName: string
+  countryCode: string
+  addressLine1: string
 }
 
 export type ShipmentContact = {
@@ -562,11 +562,11 @@ export type ShipmentLineItem = {
 export type ShipmentContent = {
   packages: ShipmentPackage[];
   lineItems: ShipmentLineItem[]
-  isCustomsDeclarable: string 
-  declaredValue: string 
-  declaredValueCurrency: string 
-  description: string 
-  unitOfMeasurement: string 
+  isCustomsDeclarable: string
+  declaredValue: string
+  declaredValueCurrency: string
+  description: string
+  unitOfMeasurement: string
 
 }
 
@@ -583,18 +583,18 @@ export type TCreateShipmentV2Body = CarrierType & {
 }
 
 export type TCreateShipmentDHLResponse = {
-    shipmentTrackingNumber: string
+  shipmentTrackingNumber: string
+  trackingUrl: string
+  packages: Array<{
+    referenceNumber: number
+    trackingNumber: string
     trackingUrl: string
-    packages: Array<{
-      referenceNumber: number
-      trackingNumber: string
-      trackingUrl: string
-    }>
-    documents: Array<{
-      imageFormat: string
-      content: string
-      typeCode: string
-    }>
-  }  
+  }>
+  documents: Array<{
+    imageFormat: string
+    content: string
+    typeCode: string
+  }>
 }
+
 

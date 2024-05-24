@@ -1,9 +1,12 @@
+import fs from 'fs'
+import path from 'path'
 import bcrypt from "bcrypt";
 import { config } from 'dotenv'
-import Counter from "../models/counter";
-import { BaseLabel, TCreateShipmentV2Body, TGetDHLRatesResponse, TGetRateReponse, TableName } from "../interfaces";
-import { COMMISSION_PERCENTAGE } from "../constants";
 import moment from "moment-timezone";
+
+import Counter from "../models/counter";
+import { COMMISSION_PERCENTAGE } from "../constants";
+import { BaseLabel, TCreateShipmentV2Body, TGetDHLRatesResponse, TGetRateResponse, TableName } from "../interfaces";
 
 config() // To load envs ASAP
 
@@ -125,7 +128,7 @@ export const getCurrentDate = () => {
   return `${year}-${month}-${day}`;
 }
 
-export const getDHLRateGenericResponse = (rates: TGetDHLRatesResponse['products'][0]): TGetRateReponse => {
+export const getDHLRateGenericResponse = (rates: TGetDHLRatesResponse['products'][0]): TGetRateResponse => {
   const { productName, totalPrice, weight, totalPriceBreakdown, detailedPriceBreakdown } = rates || {}
   const { priceCurrencies, totalSum } = totalPrice.reduce((accumulator, currentItem) => {
     accumulator.totalSum += currentItem.price;
@@ -249,4 +252,10 @@ export const createDHLGenericShipmentPayload = (payload: TCreateShipmentV2Body) 
       }
     })
   })
+}
+
+export const TEMP_DIR = path.join(__dirname, 'temp_files');
+
+if (!fs.existsSync(TEMP_DIR)) {
+  fs.mkdirSync(TEMP_DIR);
 }
