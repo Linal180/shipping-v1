@@ -49,3 +49,21 @@ export const createDHLShipment = async (body: TCreateShipmentV2Body) => {
     printLogs(`DHL ${createDHLShipment.name}`, error)
   }
 }
+
+export const getDHLShipmentTracking = async (trackingNumber: string) => {
+
+  try {
+    const {data} = await dhl.get(`/shipments/${trackingNumber}/tracking`, {
+      params: {
+        trackingView: 'all-checkpoints',
+        levelOfDetail: 'all',
+        requestControlledAccessDataCodes: false,
+        requestGMTOffsetPerEvent: false
+      }
+    });
+
+    return data;
+  } catch (error) {
+      printLogs(`DHL Service ${getDHLShipmentTracking.name}`, error)
+  }
+}

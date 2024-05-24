@@ -169,7 +169,7 @@ export const getDHLRateGenericResponse = (rates: TGetDHLRatesResponse['products'
     serviceName: productName,
     totalPrice: {
       currency: priceCurrencies || '',
-      price: totalSum || 0
+      price: (totalSum || 1) * parseFloat(COMMISSION_PERCENTAGE.toFixed(2))
     },
     weight: {
       unit: weight.unitOfMeasurement,
@@ -225,7 +225,7 @@ export const createDHLGenericShipmentPayload = (payload: TCreateShipmentV2Body) 
     },
     content: {
       packages,
-      incoterm: "DAP",
+      incoterm: "DDU",
       exportDeclaration: {
         lineItems,
         invoice: {
@@ -254,7 +254,7 @@ export const createDHLGenericShipmentPayload = (payload: TCreateShipmentV2Body) 
   })
 }
 
-export const TEMP_DIR = path.join(__dirname, 'temp_files');
+export const TEMP_DIR = path.join(__dirname, 'tmp');
 
 if (!fs.existsSync(TEMP_DIR)) {
   fs.mkdirSync(TEMP_DIR);

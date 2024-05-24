@@ -3,7 +3,7 @@ import User from "../../models/user";
 import Shipment from "../../models/shipment";
 
 import { getDHLRateGenericResponse, printLogs } from "../../lib";
-import { createDHLShipment, getRates as getDHLRates } from '../../carriers/DHL'
+import { createDHLShipment, getRates as getDHLRates, getDHLShipmentTracking } from '../../carriers/DHL'
 import { CustomRequest, GetRatesV2Body, TCreateShipmentV2Body } from "../../interfaces";
 
 export const getCarrierRates = async (body: GetRatesV2Body) => {
@@ -38,7 +38,9 @@ export const createCarrierShipment = async (req: CustomRequest) => {
         ...rest
       })
 
-      return ship;
+      return await Shipment.findOne(ship._id)
+        .select('-documents -trackingUrl -packages')
+        .exec();
     }
   } catch (error) {
     printLogs(`V2 Service ${getCarrierRates.name}`, error)
@@ -126,3 +128,17 @@ export const getShipmentDocumentByTracking = async (req: Request) => {
     }
   }
 }
+
+export const getShipmentTracking = async (trackingNumber: string) => {
+  try {
+    const tracking = await getDHLShipmentTracking(trackingNumber)
+
+    return {
+      status: 200,
+      message: 'Tracking retrieved successfully',
+      tracking
+    }
+  } catch (error) {
+    printLogs(`Service ${getShipmentTracking.name}`, error)
+  }
+};

@@ -9,7 +9,7 @@ import { TEMP_DIR, printLogs } from "../../lib";
 import { CustomRequest, GetRatesV2Body } from "../../interfaces";
 import {
   createCarrierShipment, getCarrierRates, getAllShipments, getUserShipments,
-  getShipmentDocumentByTracking
+  getShipmentDocumentByTracking, getShipmentTracking
 } from "./service";
 
 export const getRates = async (req: Request, res: Response) => {
@@ -106,3 +106,16 @@ export const shipmentDocumentByTracking = async (req: Request, res: Response) =>
     res.status(500).json({ message: error.message, documents: [] });
   }
 };
+
+export const shipmentTracking = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const shipmentDetail = await getShipmentTracking(id)
+
+    res.status(200).json(shipmentDetail);
+  } catch (error) {
+    console.error(`Error fetching results: ${error.message}`);
+    res.status(500).json(`Error fetching results: ${error.message}`)
+  }
+}

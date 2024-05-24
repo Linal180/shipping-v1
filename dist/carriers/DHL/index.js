@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createDHLShipment = exports.getRates = void 0;
+exports.getDHLShipmentTracking = exports.createDHLShipment = exports.getRates = void 0;
 const axios_1 = __importDefault(require("axios"));
 const lib_1 = require("../../lib");
 const dhl = axios_1.default.create({
@@ -57,4 +57,21 @@ const createDHLShipment = (body) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.createDHLShipment = createDHLShipment;
+const getDHLShipmentTracking = (trackingNumber) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { data } = yield dhl.get(`/shipments/${trackingNumber}/tracking`, {
+            params: {
+                trackingView: 'all-checkpoints',
+                levelOfDetail: 'all',
+                requestControlledAccessDataCodes: false,
+                requestGMTOffsetPerEvent: false
+            }
+        });
+        return data;
+    }
+    catch (error) {
+        (0, lib_1.printLogs)(`DHL Service ${exports.getDHLShipmentTracking.name}`, error);
+    }
+});
+exports.getDHLShipmentTracking = getDHLShipmentTracking;
 //# sourceMappingURL=index.js.map

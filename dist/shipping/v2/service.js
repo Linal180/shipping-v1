@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserShipments = exports.getAllShipments = exports.createCarrierShipment = exports.getCarrierRates = void 0;
+exports.getShipmentTracking = exports.getShipmentDocumentByTracking = exports.getUserShipments = exports.getAllShipments = exports.createCarrierShipment = exports.getCarrierRates = void 0;
 const user_1 = __importDefault(require("../../models/user"));
 const shipment_1 = __importDefault(require("../../models/shipment"));
 const lib_1 = require("../../lib");
@@ -51,7 +51,9 @@ const createCarrierShipment = (req) => __awaiter(void 0, void 0, void 0, functio
         if (carrier === 'DHL') {
             const _b = yield (0, DHL_1.createDHLShipment)(body), { shipmentTrackingNumber } = _b, rest = __rest(_b, ["shipmentTrackingNumber"]);
             const ship = yield shipment_1.default.create(Object.assign({ userId: user.userId, trackingNumber: shipmentTrackingNumber }, rest));
-            return ship;
+            return yield shipment_1.default.findOne(ship._id)
+                .select('-documents -trackingUrl -packages')
+                .exec();
         }
     }
     catch (error) {
@@ -68,6 +70,7 @@ const getAllShipments = (req) => __awaiter(void 0, void 0, void 0, function* () 
     const limitNumber = parseInt((_d = limit) !== null && _d !== void 0 ? _d : '10') || 10;
     try {
         const shipments = yield shipment_1.default.find()
+            .select('-documents')
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
             .lean()
@@ -91,6 +94,7 @@ const getUserShipments = (req) => __awaiter(void 0, void 0, void 0, function* ()
             const currentUser = yield user_1.default.findOne({ _id: userId });
             if (currentUser) {
                 const shipments = yield shipment_1.default.find({ userId })
+                    .select('-documents')
                     .skip((pageNumber - 1) * limitNumber)
                     .limit(limitNumber)
                     .lean()
@@ -105,4 +109,46 @@ const getUserShipments = (req) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getUserShipments = getUserShipments;
+const getShipmentDocumentByTracking = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    const { tracking } = req.params;
+    try {
+        const shipment = yield shipment_1.default.findOne({ trackingNumber: tracking });
+        if (!shipment) {
+            return {
+                status: 404,
+                message: "Shipment not found"
+            };
+        }
+        const documents = shipment.documents.map((document, index) => {
+            const fileUrl = `${req.protocol}://${req.get('host')}/pdf/${document._id}.pdf`;
+            return {
+                [`Document ${index + 1}`]: fileUrl,
+            };
+        });
+        return { status: 200, message: "Documents retrieved successfully", documents };
+    }
+    catch (error) {
+        (0, lib_1.printLogs)(`Service ${exports.getShipmentDocumentByTracking}`, error);
+        return {
+            status: 500,
+            documents: [],
+            message: "Internal Server Error"
+        };
+    }
+});
+exports.getShipmentDocumentByTracking = getShipmentDocumentByTracking;
+const getShipmentTracking = (trackingNumber) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const tracking = yield (0, DHL_1.getDHLShipmentTracking)(trackingNumber);
+        return {
+            status: 200,
+            message: 'Tracking retrieved successfully',
+            tracking
+        };
+    }
+    catch (error) {
+        (0, lib_1.printLogs)(`Service ${exports.getShipmentTracking.name}`, error);
+    }
+});
+exports.getShipmentTracking = getShipmentTracking;
 //# sourceMappingURL=service.js.map

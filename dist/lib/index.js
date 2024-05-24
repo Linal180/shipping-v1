@@ -175,7 +175,7 @@ const getDHLRateGenericResponse = (rates) => {
         serviceName: productName,
         totalPrice: {
             currency: priceCurrencies || '',
-            price: totalSum || 0
+            price: (totalSum || 1) * parseFloat(constants_1.COMMISSION_PERCENTAGE.toFixed(2))
         },
         weight: {
             unit: weight.unitOfMeasurement,
@@ -225,7 +225,7 @@ const createDHLGenericShipmentPayload = (payload) => {
         },
         content: {
             packages,
-            incoterm: "DAP",
+            incoterm: "DDU",
             exportDeclaration: {
                 lineItems,
                 invoice: {
@@ -252,7 +252,7 @@ const createDHLGenericShipmentPayload = (payload) => {
     });
 };
 exports.createDHLGenericShipmentPayload = createDHLGenericShipmentPayload;
-exports.TEMP_DIR = path_1.default.join(__dirname, 'temp_files');
+exports.TEMP_DIR = path_1.default.join(__dirname, 'tmp');
 if (!fs_1.default.existsSync(exports.TEMP_DIR)) {
     fs_1.default.mkdirSync(exports.TEMP_DIR);
 }

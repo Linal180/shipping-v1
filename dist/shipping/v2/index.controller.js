@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.shippingDoc = exports.userShipments = exports.allShipments = exports.createShipment = exports.getRates = void 0;
+exports.shipmentTracking = exports.shipmentDocumentByTracking = exports.shippingDoc = exports.userShipments = exports.allShipments = exports.createShipment = exports.getRates = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const user_1 = __importDefault(require("../../models/user"));
@@ -89,4 +89,30 @@ const shippingDoc = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.shippingDoc = shippingDoc;
+const shipmentDocumentByTracking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { tracking } = req.params;
+    if (!tracking) {
+        return res.status(400).json({ message: "Bad Request | Tracking ID missing" });
+    }
+    try {
+        const { message, status, documents } = yield (0, service_1.getShipmentDocumentByTracking)(req);
+        res.status(status).json({ message, documents });
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message, documents: [] });
+    }
+});
+exports.shipmentDocumentByTracking = shipmentDocumentByTracking;
+const shipmentTracking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    try {
+        const shipmentDetail = yield (0, service_1.getShipmentTracking)(id);
+        res.status(200).json(shipmentDetail);
+    }
+    catch (error) {
+        console.error(`Error fetching results: ${error.message}`);
+        res.status(500).json(`Error fetching results: ${error.message}`);
+    }
+});
+exports.shipmentTracking = shipmentTracking;
 //# sourceMappingURL=index.controller.js.map
