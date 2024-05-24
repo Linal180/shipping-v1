@@ -5,6 +5,7 @@ import Shipment from "../../models/shipment";
 import { getDHLRateGenericResponse, printLogs } from "../../lib";
 import { createDHLShipment, getRates as getDHLRates, getDHLShipmentTracking } from '../../carriers/DHL'
 import { CustomRequest, GetRatesV2Body, TCreateShipmentV2Body } from "../../interfaces";
+import shipment from "../../models/shipment";
 
 export const getCarrierRates = async (body: GetRatesV2Body) => {
   const { carrier, ...params } = body || {};
@@ -70,6 +71,24 @@ export const getAllShipments = async (req: CustomRequest) => {
   }
 };
 
+export const getShipment = async (id: string) => {
+  try {
+    const shipment = await Shipment.findById(id)
+      .select('-documents -trackingUrl -packages')
+      .lean()
+      .exec();
+
+    return shipment ? {
+      shipment, status: 200
+    } : {
+      shipment: null, status: 404
+    }
+  } catch (error) {
+    printLogs(getAllShipments.name, error)
+    return { shipment: null, status: 500}
+  }
+};
+
 export const getUserShipments = async (req: CustomRequest) => {
   const { user: { userId }, query } = req || {};
   const { page, limit } = query || {}
@@ -83,7 +102,7 @@ export const getUserShipments = async (req: CustomRequest) => {
 
       if (currentUser) {
         const shipments = await Shipment.find({ userId })
-          .select('-documents')
+          .select('-documents -trackingUrl -packages')
           .skip((pageNumber - 1) * limitNumber)
           .limit(limitNumber)
           .lean()

@@ -9,7 +9,8 @@ import { TEMP_DIR, printLogs } from "../../lib";
 import { CustomRequest, GetRatesV2Body } from "../../interfaces";
 import {
   createCarrierShipment, getCarrierRates, getAllShipments, getUserShipments,
-  getShipmentDocumentByTracking, getShipmentTracking
+  getShipmentDocumentByTracking, getShipmentTracking,
+  getShipment
 } from "./service";
 
 export const getRates = async (req: Request, res: Response) => {
@@ -50,6 +51,18 @@ export const allShipments = async (req: CustomRequest, res: Response) => {
     const { page, shipments } = await getAllShipments(req)
 
     res.status(200).json({ page, shipments })
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export const singleShipment = async (req: CustomRequest, res: Response) => {
+  const { params: { id } } = req
+
+  try {
+    const { shipment, status } = await getShipment(id)
+
+    res.status(status).json({ shipment })
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -101,7 +114,7 @@ export const shipmentDocumentByTracking = async (req: Request, res: Response) =>
   try {
     const { message, status, documents } = await getShipmentDocumentByTracking(req)
 
-    res.status(status).json({ message, documents })
+    res.status(status).json({ message, data: documents })
   } catch (error) {
     res.status(500).json({ message: error.message, documents: [] });
   }
