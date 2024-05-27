@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getShipmentTracking = exports.getShipmentDocumentByTracking = exports.getUserShipments = exports.getShipment = exports.getAllShipments = exports.createCarrierShipment = exports.getCarrierRates = void 0;
+exports.getShipmentTracking = exports.getUserShipments = exports.getShipment = exports.getAllShipments = exports.createCarrierShipment = exports.getCarrierRates = void 0;
 const user_1 = __importDefault(require("../../models/user"));
 const shipment_1 = __importDefault(require("../../models/shipment"));
 const lib_1 = require("../../lib");
@@ -145,34 +145,6 @@ const getUserShipments = (req) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getUserShipments = getUserShipments;
-const getShipmentDocumentByTracking = (req) => __awaiter(void 0, void 0, void 0, function* () {
-    const { tracking } = req.params;
-    try {
-        const shipment = yield shipment_1.default.findOne({ trackingNumber: tracking });
-        if (!shipment) {
-            return {
-                status: 404,
-                message: "Shipment not found"
-            };
-        }
-        const documents = shipment.documents.map((document, index) => {
-            const fileUrl = `${req.protocol}://${req.get('host')}/pdf/${document._id}.pdf`;
-            return {
-                [`Document ${index + 1}`]: fileUrl,
-            };
-        });
-        return { status: 200, message: "Documents retrieved successfully", data: documents };
-    }
-    catch (error) {
-        (0, lib_1.printLogs)(`Service ${exports.getShipmentDocumentByTracking}`, error);
-        return {
-            status: 500,
-            data: [],
-            message: "Internal Server Error"
-        };
-    }
-});
-exports.getShipmentDocumentByTracking = getShipmentDocumentByTracking;
 const getShipmentTracking = (trackingNumber) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { data, message, status } = yield (0, DHL_1.getDHLShipmentTracking)(trackingNumber);

@@ -15,13 +15,16 @@ const constants_1 = require("../constants");
 const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userData = req.body;
+        console.log("***", userData);
         const response = yield (0, users_service_1.createUser)(userData);
+        console.log(response, ":::::::::::::");
         if (response.status === 400) {
             return res.status(400).json({ message: constants_1.USER_ALREADY_EXIST });
         }
         res.status(201).json({ message: constants_1.REGISTER_SUCCESSFUL });
     }
     catch (error) {
+        console.log("::::::::>", error);
         res.status(500).json({ message: constants_1.USER_REGISTRATION_FAILED });
     }
 });

@@ -106,11 +106,22 @@ const shipmentDocumentByTracking = (req, res) => __awaiter(void 0, void 0, void 
         return res.status(400).json({ message: "Bad Request | Tracking ID missing" });
     }
     try {
-        const { message, status, data } = yield (0, service_1.getShipmentDocumentByTracking)(req);
-        res.status(status).json({ message, data });
+        const shipment = yield shipment_1.default.findOne({ trackingNumber: tracking });
+        if (!shipment) {
+            res.status(404).json({ message: "Shipment Not Found" });
+            return;
+        }
+        const documents = shipment.documents;
+        if (!documents.length) {
+            return res.status(404).json({ message: "Shipment hae no documents" });
+        }
+        const decodedContent = Buffer.from(documents[0].content, 'base64');
+        const filePath = path_1.default.join(lib_1.TEMP_DIR, `${documents[0]._id}.pdf`);
+        fs_1.default.writeFileSync(filePath, decodedContent);
+        res.sendFile(filePath);
     }
     catch (error) {
-        res.status(500).json({ message: error.message, documents: [] });
+        res.status(500).json({ message: error.message });
     }
 });
 exports.shipmentDocumentByTracking = shipmentDocumentByTracking;
