@@ -9,7 +9,7 @@ import { TEMP_DIR, printLogs } from "../../lib";
 import { CustomRequest, GetRatesV2Body } from "../../interfaces";
 import {
   createCarrierShipment, getCarrierRates, getAllShipments, getUserShipments,
-  getShipmentDocumentByTracking, getShipmentTracking, getShipment
+  getShipmentTracking, getShipment
 } from "./service";
 
 export const getRates = async (req: Request, res: Response) => {
@@ -106,16 +106,32 @@ export const shippingDoc = async (req: Request, res: Response) => {
 
 export const shipmentDocumentByTracking = async (req: Request, res: Response) => {
   const { tracking } = req.params;
+  
   if (!tracking) {
     return res.status(400).json({ message: "Bad Request | Tracking ID missing" });
   }
 
   try {
-    const { message, status, data } = await getShipmentDocumentByTracking(req)
+    const shipment = await Shipment.findOne({ trackingNumber: tracking });
 
-    res.status(status).json({ message, data })
+    if (!shipment) {
+      res.status(404).json({ message: "Shipment Not Found" });
+      return
+    }
+
+    const documents = shipment.documents
+
+    if (!documents.length) {
+      return res.status(404).json({ message: "Shipment hae no documents" });
+    }
+
+    const decodedContent = Buffer.from(documents[0].content, 'base64');
+    const filePath = path.join(TEMP_DIR, `${documents[0]._id}.pdf`);
+
+    fs.writeFileSync(filePath, decodedContent);
+    res.sendFile(filePath);
   } catch (error) {
-    res.status(500).json({ message: error.message, documents: [] });
+    res.status(500).json({ message: error.message });
   }
 };
 

@@ -144,38 +144,6 @@ export const getUserShipments = async (req: CustomRequest) => {
   }
 };
 
-export const getShipmentDocumentByTracking = async (req: Request) => {
-  const { tracking } = req.params;
-
-  try {
-    const shipment = await Shipment.findOne({ trackingNumber: tracking });
-
-    if (!shipment) {
-      return {
-        status: 404,
-        message: "Shipment not found"
-      }
-    }
-
-    const documents = shipment.documents.map((document, index) => {
-      const fileUrl = `${req.protocol}://${req.get('host')}/pdf/${document._id}.pdf`;
-      return {
-        [`Document ${index + 1}`]: fileUrl,
-      };
-    });
-
-    return { status: 200, message: "Documents retrieved successfully", data: documents }
-  } catch (error) {
-    printLogs(`Service ${getShipmentDocumentByTracking}`, error)
-
-    return {
-      status: 500,
-      data: [],
-      message: "Internal Server Error"
-    }
-  }
-}
-
 export const getShipmentTracking = async (trackingNumber: string) => {
   try {
     const { data, message, status } = await getDHLShipmentTracking(trackingNumber)

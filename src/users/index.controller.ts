@@ -8,14 +8,16 @@ import {
 export const signUp = async (req: Request, res: Response) => {
   try {
     const userData = req.body;
+    console.log("***", userData)
     const response = await createUser(userData)
-
+    console.log(response, ":::::::::::::")
     if (response.status === 400) {
       return res.status(400).json({ message: USER_ALREADY_EXIST });
     }
 
     res.status(201).json({ message: REGISTER_SUCCESSFUL });
   } catch (error) {
+    console.log("::::::::>", error)
     res.status(500).json({ message: USER_REGISTRATION_FAILED });
   }
 }
