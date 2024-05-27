@@ -27,7 +27,7 @@ export const getRates = async (params: Omit<GetRatesV2Body, 'carrier'>) => {
     length,
     width,
     height,
-    plannedShippingDate: getCurrentDate(),
+    plannedShippingDate: '2024-05-21', // Right now we have a product for this date
     isCustomsDeclarable: false,
     unitOfMeasurement: 'metric'
   }
