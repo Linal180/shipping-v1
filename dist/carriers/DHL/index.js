@@ -21,39 +21,60 @@ const dhl = axios_1.default.create({
 });
 const getRates = (params) => __awaiter(void 0, void 0, void 0, function* () {
     const { fromCity, fromCountry, height, length, toCity, toCountry, weight, width } = params || {};
+    const apiParams = {
+        accountNumber: process.env.DHL_ACCOUNT_NUMBER,
+        originCountryCode: fromCountry,
+        originCityName: fromCity,
+        destinationCountryCode: toCountry,
+        destinationCityName: toCity,
+        weight,
+        length,
+        width,
+        height,
+        plannedShippingDate: (0, lib_1.getCurrentDate)(),
+        isCustomsDeclarable: false,
+        unitOfMeasurement: 'metric'
+    };
     try {
         const { data } = yield dhl.get('/rates', {
-            params: {
-                accountNumber: process.env.DHL_ACCOUNT_NUMBER,
-                originCountryCode: fromCountry,
-                originCityName: fromCity,
-                destinationCountryCode: toCountry,
-                destinationCityName: toCity,
-                weight,
-                length,
-                width,
-                height,
-                plannedShippingDate: (0, lib_1.getCurrentDate)(),
-                isCustomsDeclarable: false,
-                unitOfMeasurement: 'metric'
-            }
+            params: apiParams
         });
         const { products } = data || {};
-        return products[0];
+        return {
+            status: 200,
+            message: 'Rates calculated successfully',
+            data: products[0]
+        };
     }
     catch (error) {
         (0, lib_1.printLogs)(`DHL ${exports.getRates.name}`, error);
+        const { detail, message, status } = (0, lib_1.getErrorResponse)(error);
+        return {
+            status,
+            message: `${detail} | ${message}`,
+            data: null
+        };
     }
 });
 exports.getRates = getRates;
 const createDHLShipment = (body) => __awaiter(void 0, void 0, void 0, function* () {
     const shipmentPayload = (0, lib_1.createDHLGenericShipmentPayload)(body);
     try {
-        const res = yield dhl.post('/shipments', shipmentPayload);
-        return res.data;
+        const { data } = yield dhl.post('/shipments', shipmentPayload);
+        return {
+            status: 200,
+            message: 'Shipment created successfully',
+            data
+        };
     }
     catch (error) {
         (0, lib_1.printLogs)(`DHL ${exports.createDHLShipment.name}`, error);
+        const { detail, message, status } = (0, lib_1.getErrorResponse)(error);
+        return {
+            status,
+            message: `${detail} | ${message}`,
+            data: null
+        };
     }
 });
 exports.createDHLShipment = createDHLShipment;
@@ -67,10 +88,20 @@ const getDHLShipmentTracking = (trackingNumber) => __awaiter(void 0, void 0, voi
                 requestGMTOffsetPerEvent: false
             }
         });
-        return data;
+        return {
+            status: 200,
+            message: 'Tracking retrived successfully',
+            data
+        };
     }
     catch (error) {
         (0, lib_1.printLogs)(`DHL Service ${exports.getDHLShipmentTracking.name}`, error);
+        const { detail, message, status } = (0, lib_1.getErrorResponse)(error);
+        return {
+            status,
+            message: `${detail} | ${message}`,
+            data: null
+        };
     }
 });
 exports.getDHLShipmentTracking = getDHLShipmentTracking;

@@ -22,8 +22,8 @@ const service_1 = require("./service");
 const getRates = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
     try {
-        const response = yield (0, service_1.getCarrierRates)(body);
-        res.status(200).json({ message: 'Rate calculated successfully', data: response });
+        const { data, message, status } = yield (0, service_1.getCarrierRates)(body);
+        res.status(status).json({ message, data });
     }
     catch (error) {
         (0, lib_1.printLogs)(exports.getRates.name, error);
@@ -39,8 +39,8 @@ const createShipment = (req, res) => __awaiter(void 0, void 0, void 0, function*
             res.status(403).json({ message: "This action is forbidden for you" });
             return;
         }
-        const data = yield (0, service_1.createCarrierShipment)(req);
-        res.status(201).json({ message: "Shipment created and save successfully!", data });
+        const { data, message, status } = yield (0, service_1.createCarrierShipment)(req);
+        res.status(status).json({ message, data });
     }
     catch (error) {
         res.status(500).json({ message: error.message });
@@ -49,8 +49,8 @@ const createShipment = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.createShipment = createShipment;
 const allShipments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { page, shipments } = yield (0, service_1.getAllShipments)(req);
-        res.status(200).json({ page, shipments });
+        const { data, message, status } = yield (0, service_1.getAllShipments)(req);
+        res.status(status).json({ message, data });
     }
     catch (error) {
         res.status(500).json({ message: error.message });
@@ -61,7 +61,7 @@ const singleShipment = (req, res) => __awaiter(void 0, void 0, void 0, function*
     const { params: { id } } = req;
     try {
         const { shipment, status } = yield (0, service_1.getShipment)(id);
-        res.status(status).json({ shipment });
+        res.status(status).json({ data: shipment });
     }
     catch (error) {
         res.status(500).json({ message: error.message });
@@ -70,8 +70,8 @@ const singleShipment = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.singleShipment = singleShipment;
 const userShipments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { page, shipments } = yield (0, service_1.getUserShipments)(req);
-        res.status(200).json({ page, shipments });
+        const { data, status } = yield (0, service_1.getUserShipments)(req);
+        res.status(status).json({ data });
     }
     catch (error) {
         res.status(500).json({ message: error.message });
@@ -106,8 +106,8 @@ const shipmentDocumentByTracking = (req, res) => __awaiter(void 0, void 0, void 
         return res.status(400).json({ message: "Bad Request | Tracking ID missing" });
     }
     try {
-        const { message, status, documents } = yield (0, service_1.getShipmentDocumentByTracking)(req);
-        res.status(status).json({ message, data: documents });
+        const { message, status, data } = yield (0, service_1.getShipmentDocumentByTracking)(req);
+        res.status(status).json({ message, data });
     }
     catch (error) {
         res.status(500).json({ message: error.message, documents: [] });
@@ -117,11 +117,10 @@ exports.shipmentDocumentByTracking = shipmentDocumentByTracking;
 const shipmentTracking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const shipmentDetail = yield (0, service_1.getShipmentTracking)(id);
-        res.status(200).json(shipmentDetail);
+        const { data, message, status } = yield (0, service_1.getShipmentTracking)(id);
+        res.status(status).json({ message, data });
     }
     catch (error) {
-        console.error(`Error fetching results: ${error.message}`);
         res.status(500).json(`Error fetching results: ${error.message}`);
     }
 });

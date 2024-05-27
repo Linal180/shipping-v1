@@ -32,11 +32,18 @@ const getCarrierRates = (body) => __awaiter(void 0, void 0, void 0, function* ()
     const _a = body || {}, { carrier } = _a, params = __rest(_a, ["carrier"]);
     try {
         if (carrier === 'DHL') {
-            const rates = yield (0, DHL_1.getRates)(params);
-            const genericResponse = (0, lib_1.getDHLRateGenericResponse)(rates);
-            return genericResponse;
+            const { data, message, status } = yield (0, DHL_1.getRates)(params);
+            if (status === 200) {
+                const genericResponse = (0, lib_1.getDHLRateGenericResponse)(data);
+                return {
+                    status, message, data: genericResponse
+                };
+            }
+            return { status, message, data: {} };
         }
-        return null;
+        return {
+            status: 400, message: 'Bad request', data: null
+        };
     }
     catch (error) {
         (0, lib_1.printLogs)(`V2 Service ${exports.getCarrierRates.name}`, error);
@@ -49,11 +56,22 @@ const createCarrierShipment = (req) => __awaiter(void 0, void 0, void 0, functio
     const { carrier } = body || {};
     try {
         if (carrier === 'DHL') {
-            const _b = yield (0, DHL_1.createDHLShipment)(body), { shipmentTrackingNumber } = _b, rest = __rest(_b, ["shipmentTrackingNumber"]);
-            const ship = yield shipment_1.default.create(Object.assign({ userId: user.userId, trackingNumber: shipmentTrackingNumber }, rest));
-            return yield shipment_1.default.findOne(ship._id)
-                .select('-documents -trackingUrl -packages')
-                .exec();
+            const { data, message, status } = yield (0, DHL_1.createDHLShipment)(body);
+            if (status === 200) {
+                const _b = data || {}, { shipmentTrackingNumber } = _b, rest = __rest(_b, ["shipmentTrackingNumber"]);
+                const ship = yield shipment_1.default.create(Object.assign({ userId: user.userId, trackingNumber: shipmentTrackingNumber }, rest));
+                const newShipment = yield shipment_1.default.findOne(ship._id)
+                    .select('-documents -trackingUrl -packages')
+                    .exec();
+                return {
+                    status,
+                    message,
+                    data: newShipment
+                };
+            }
+            return {
+                message, status, data
+            };
         }
     }
     catch (error) {
@@ -70,12 +88,12 @@ const getAllShipments = (req) => __awaiter(void 0, void 0, void 0, function* () 
     const limitNumber = parseInt((_d = limit) !== null && _d !== void 0 ? _d : '10') || 10;
     try {
         const shipments = yield shipment_1.default.find()
-            .select('-documents')
+            .select('-documents -trackingUrl -packages')
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber)
             .lean()
             .exec();
-        return { shipments, page: pageNumber };
+        return { message: '', status: 200, data: { shipments, page: pageNumber } };
     }
     catch (error) {
         (0, lib_1.printLogs)(exports.getAllShipments.name, error);
@@ -117,7 +135,7 @@ const getUserShipments = (req) => __awaiter(void 0, void 0, void 0, function* ()
                     .limit(limitNumber)
                     .lean()
                     .exec();
-                return { shipments, page: pageNumber };
+                return { data: { shipments, page: pageNumber }, status: 200 };
             }
         }
     }
@@ -143,13 +161,13 @@ const getShipmentDocumentByTracking = (req) => __awaiter(void 0, void 0, void 0,
                 [`Document ${index + 1}`]: fileUrl,
             };
         });
-        return { status: 200, message: "Documents retrieved successfully", documents };
+        return { status: 200, message: "Documents retrieved successfully", data: documents };
     }
     catch (error) {
         (0, lib_1.printLogs)(`Service ${exports.getShipmentDocumentByTracking}`, error);
         return {
             status: 500,
-            documents: [],
+            data: [],
             message: "Internal Server Error"
         };
     }
@@ -157,11 +175,11 @@ const getShipmentDocumentByTracking = (req) => __awaiter(void 0, void 0, void 0,
 exports.getShipmentDocumentByTracking = getShipmentDocumentByTracking;
 const getShipmentTracking = (trackingNumber) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const tracking = yield (0, DHL_1.getDHLShipmentTracking)(trackingNumber);
+        const { data, message, status } = yield (0, DHL_1.getDHLShipmentTracking)(trackingNumber);
         return {
-            status: 200,
-            message: 'Tracking retrieved successfully',
-            tracking
+            status,
+            message,
+            data
         };
     }
     catch (error) {

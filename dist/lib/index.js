@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TEMP_DIR = exports.createDHLGenericShipmentPayload = exports.getDateTimeForShipment = exports.getDHLRateGenericResponse = exports.getCurrentDate = exports.printLogs = exports.getDHLHeaders = exports.getAllShipperAccount = exports.getUspsShipperAccount = exports.getChronoPostShipperAccount = exports.getShipperAccount = exports.customizeLabel = exports.getNextSequenceId = exports.addCounterRecord = exports.generateLabelFileUrl = exports.generateRandomNumbers = exports.comparePassword = exports.hashPassword = void 0;
+exports.getErrorResponse = exports.TEMP_DIR = exports.createDHLGenericShipmentPayload = exports.getDateTimeForShipment = exports.getDHLRateGenericResponse = exports.getCurrentDate = exports.printLogs = exports.getDHLHeaders = exports.getAllShipperAccount = exports.getUspsShipperAccount = exports.getChronoPostShipperAccount = exports.getShipperAccount = exports.customizeLabel = exports.getNextSequenceId = exports.addCounterRecord = exports.generateLabelFileUrl = exports.generateRandomNumbers = exports.comparePassword = exports.hashPassword = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -128,9 +128,12 @@ const getDHLHeaders = () => {
 };
 exports.getDHLHeaders = getDHLHeaders;
 const printLogs = (methodName, error) => {
-    console.log(`*************** Error in ${methodName} **************`);
-    console.log("Error: ", error);
-    console.log("******************************************************");
+    const { response } = error || {};
+    if (response) {
+        console.log(`*************** Error in ${methodName} **************`);
+        console.log("Error: ", response);
+        console.log("******************************************************");
+    }
 };
 exports.printLogs = printLogs;
 const getCurrentDate = () => {
@@ -256,4 +259,12 @@ exports.TEMP_DIR = path_1.default.join(__dirname, 'tmp');
 if (!fs_1.default.existsSync(exports.TEMP_DIR)) {
     fs_1.default.mkdirSync(exports.TEMP_DIR);
 }
+const getErrorResponse = (error) => {
+    const { response: { data: { status = "Unknown Status", message = 'No message available', detail = 'no detail available', additionalDetails = [] } = {} } = {} } = error || {};
+    return {
+        status, message,
+        detail: additionalDetails.length ? detail + additionalDetails.map((err, index) => ` | Error ${index + 1}: ${err}`) : detail
+    };
+};
+exports.getErrorResponse = getErrorResponse;
 //# sourceMappingURL=index.js.map
