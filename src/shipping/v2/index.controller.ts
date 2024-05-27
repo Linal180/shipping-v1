@@ -9,17 +9,16 @@ import { TEMP_DIR, printLogs } from "../../lib";
 import { CustomRequest, GetRatesV2Body } from "../../interfaces";
 import {
   createCarrierShipment, getCarrierRates, getAllShipments, getUserShipments,
-  getShipmentDocumentByTracking, getShipmentTracking,
-  getShipment
+  getShipmentDocumentByTracking, getShipmentTracking, getShipment
 } from "./service";
 
 export const getRates = async (req: Request, res: Response) => {
   const body = req.body;
 
   try {
-    const response = await getCarrierRates(body as unknown as GetRatesV2Body);
+    const { data, message, status } = await getCarrierRates(body as unknown as GetRatesV2Body);
 
-    res.status(200).json({ message: 'Rate calculated successfully', data: response });
+    res.status(status).json({ message, data });
   } catch (error) {
     printLogs(getRates.name, error);
 
@@ -38,9 +37,9 @@ export const createShipment = async (req: CustomRequest, res: Response) => {
       return
     }
 
-    const data = await createCarrierShipment(req);
+    const { data, message, status } = await createCarrierShipment(req);
 
-    res.status(201).json({ message: "Shipment created and save successfully!", data })
+    res.status(status).json({ message, data })
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -48,9 +47,9 @@ export const createShipment = async (req: CustomRequest, res: Response) => {
 
 export const allShipments = async (req: CustomRequest, res: Response) => {
   try {
-    const { page, shipments } = await getAllShipments(req)
+    const { data, message, status } = await getAllShipments(req)
 
-    res.status(200).json({ page, shipments })
+    res.status(status).json({ message, data })
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -62,7 +61,7 @@ export const singleShipment = async (req: CustomRequest, res: Response) => {
   try {
     const { shipment, status } = await getShipment(id)
 
-    res.status(status).json({ shipment })
+    res.status(status).json({ data: shipment })
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -70,9 +69,9 @@ export const singleShipment = async (req: CustomRequest, res: Response) => {
 
 export const userShipments = async (req: CustomRequest, res: Response) => {
   try {
-    const { page, shipments } = await getUserShipments(req)
+    const { data, status } = await getUserShipments(req)
 
-    res.status(200).json({ page, shipments })
+    res.status(status).json({ data })
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -112,9 +111,9 @@ export const shipmentDocumentByTracking = async (req: Request, res: Response) =>
   }
 
   try {
-    const { message, status, documents } = await getShipmentDocumentByTracking(req)
+    const { message, status, data } = await getShipmentDocumentByTracking(req)
 
-    res.status(status).json({ message, data: documents })
+    res.status(status).json({ message, data })
   } catch (error) {
     res.status(500).json({ message: error.message, documents: [] });
   }
@@ -124,11 +123,10 @@ export const shipmentTracking = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    const shipmentDetail = await getShipmentTracking(id)
+    const { data, message, status } = await getShipmentTracking(id)
 
-    res.status(200).json(shipmentDetail);
+    res.status(status).json({ message, data });
   } catch (error) {
-    console.error(`Error fetching results: ${error.message}`);
     res.status(500).json(`Error fetching results: ${error.message}`)
   }
 }

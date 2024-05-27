@@ -1,6 +1,11 @@
 import axios from "axios";
-import { createDHLGenericShipmentPayload, getCurrentDate, getDHLHeaders, printLogs } from "../../lib";
-import { GetRatesV2Body, TCreateShipmentDHLResponse, TCreateShipmentV2Body, TGetDHLRatesResponse } from "../../interfaces";
+
+import {
+  createDHLGenericShipmentPayload, getCurrentDate, getDHLHeaders, getErrorResponse, printLogs
+} from "../../lib";
+import {
+  GetRatesV2Body, TCreateShipmentDHLResponse, TCreateShipmentV2Body, TGetDHLRatesResponse
+} from "../../interfaces";
 
 const dhl = axios.create({
   baseURL: process.env.DHL_API_ENDPOINT || 'https://express.api.dhl.com/mydhlapi',
@@ -12,29 +17,45 @@ export const getRates = async (params: Omit<GetRatesV2Body, 'carrier'>) => {
     fromCity, fromCountry, height, length, toCity, toCountry, weight, width
   } = params || {};
 
+  const apiParams = {
+    accountNumber: process.env.DHL_ACCOUNT_NUMBER,
+    originCountryCode: fromCountry,
+    originCityName: fromCity,
+    destinationCountryCode: toCountry,
+    destinationCityName: toCity,
+    weight,
+    length,
+    width,
+    height,
+    plannedShippingDate: getCurrentDate(),
+    isCustomsDeclarable: false,
+    unitOfMeasurement: 'metric'
+  }
+
   try {
     const { data } = await dhl.get<TGetDHLRatesResponse>('/rates', {
-      params: {
-        accountNumber: process.env.DHL_ACCOUNT_NUMBER,
-        originCountryCode: fromCountry,
-        originCityName: fromCity,
-        destinationCountryCode: toCountry,
-        destinationCityName: toCity,
-        weight,
-        length,
-        width,
-        height,
-        plannedShippingDate: getCurrentDate(),
-        isCustomsDeclarable: false,
-        unitOfMeasurement: 'metric'
-      }
+      params: apiParams
     })
 
     const { products } = data || {}
 
-    return products[0]
+    return {
+      status: 200,
+      message: 'Rates calculated successfully',
+      data: products[0]
+    }
+
   } catch (error) {
     printLogs(`DHL ${getRates.name}`, error)
+
+    const { detail, message, status } = getErrorResponse(error)
+
+    return {
+      status,
+      message: `${detail} | ${message}`,
+      data: null as any
+    };
+
   }
 }
 
@@ -42,18 +63,29 @@ export const createDHLShipment = async (body: TCreateShipmentV2Body) => {
   const shipmentPayload = createDHLGenericShipmentPayload(body)
 
   try {
-    const res = await dhl.post<TCreateShipmentDHLResponse>('/shipments', shipmentPayload)
+    const { data } = await dhl.post<TCreateShipmentDHLResponse>('/shipments', shipmentPayload)
 
-    return res.data
+    return {
+      status: 200,
+      message: 'Shipment created successfully',
+      data
+    }
   } catch (error) {
     printLogs(`DHL ${createDHLShipment.name}`, error)
+
+    const { detail, message, status } = getErrorResponse(error)
+
+    return {
+      status,
+      message: `${detail} | ${message}`,
+      data: null as any
+    };
   }
 }
 
 export const getDHLShipmentTracking = async (trackingNumber: string) => {
-
   try {
-    const {data} = await dhl.get(`/shipments/${trackingNumber}/tracking`, {
+    const { data } = await dhl.get(`/shipments/${trackingNumber}/tracking`, {
       params: {
         trackingView: 'all-checkpoints',
         levelOfDetail: 'all',
@@ -62,8 +94,19 @@ export const getDHLShipmentTracking = async (trackingNumber: string) => {
       }
     });
 
-    return data;
+    return {
+      status: 200,
+      message: 'Tracking retrived successfully',
+      data
+    };
   } catch (error) {
-      printLogs(`DHL Service ${getDHLShipmentTracking.name}`, error)
+    printLogs(`DHL Service ${getDHLShipmentTracking.name}`, error)
+    const { detail, message, status } = getErrorResponse(error)
+
+    return {
+      status,
+      message: `${detail} | ${message}`,
+      data: null as any
+    };
   }
 }

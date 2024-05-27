@@ -114,9 +114,13 @@ export const getDHLHeaders = () => {
 };
 
 export const printLogs = (methodName: string, error: any) => {
-  console.log(`*************** Error in ${methodName} **************`)
-  console.log("Error: ", error)
-  console.log("******************************************************")
+  const { response } = error || {}
+
+  if (response) {
+    console.log(`*************** Error in ${methodName} **************`)
+    console.log("Error: ", response)
+    console.log("******************************************************")
+  }
 }
 
 export const getCurrentDate = () => {
@@ -258,4 +262,22 @@ export const TEMP_DIR = path.join(__dirname, 'tmp');
 
 if (!fs.existsSync(TEMP_DIR)) {
   fs.mkdirSync(TEMP_DIR);
+}
+
+export const getErrorResponse = (error: any) => {
+  const {
+    response: {
+      data: {
+        status = "Unknown Status",
+        message = 'No message available',
+        detail = 'no detail available',
+        additionalDetails = []
+      } = {}
+    } = {}
+  } = error || {}
+
+  return {
+    status, message,
+    detail: additionalDetails.length ? detail + additionalDetails.map((err: string, index: number) => ` | Error ${index+1}: ${err}`) : detail
+  }
 }

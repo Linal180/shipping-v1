@@ -3,22 +3,35 @@ import User from "../../models/user";
 import Shipment from "../../models/shipment";
 
 import { getDHLRateGenericResponse, printLogs } from "../../lib";
-import { createDHLShipment, getRates as getDHLRates, getDHLShipmentTracking } from '../../carriers/DHL'
-import { CustomRequest, GetRatesV2Body, TCreateShipmentV2Body } from "../../interfaces";
-import shipment from "../../models/shipment";
+import {
+  createDHLShipment, getRates as getDHLRates, getDHLShipmentTracking
+} from '../../carriers/DHL'
+import {
+  CustomRequest, GetRatesV2Body, TCreateShipmentDHLResponse, TCreateShipmentV2Body
+} from "../../interfaces";
 
 export const getCarrierRates = async (body: GetRatesV2Body) => {
   const { carrier, ...params } = body || {};
 
   try {
     if (carrier === 'DHL') {
-      const rates = await getDHLRates(params as Omit<GetRatesV2Body, 'carrier'>)
+      const { data, message, status } = await getDHLRates(params as Omit<GetRatesV2Body, 'carrier'>)
 
-      const genericResponse = getDHLRateGenericResponse(rates)
-      return genericResponse;
+      if (status === 200) {
+        const genericResponse = getDHLRateGenericResponse(data);
+
+
+        return {
+          status, message, data: genericResponse
+        };
+      }
+
+      return { status, message, data: {} }
     }
 
-    return null
+    return {
+      status: 400, message: 'Bad request', data: null
+    }
   } catch (error) {
     printLogs(`V2 Service ${getCarrierRates.name}`, error)
     return null
@@ -31,17 +44,31 @@ export const createCarrierShipment = async (req: CustomRequest) => {
 
   try {
     if (carrier === 'DHL') {
-      const { shipmentTrackingNumber, ...rest } = await createDHLShipment(body as TCreateShipmentV2Body)
+      const { data, message, status } = await createDHLShipment(body as TCreateShipmentV2Body)
 
-      const ship = await Shipment.create({
-        userId: user.userId,
-        trackingNumber: shipmentTrackingNumber,
-        ...rest
-      })
+      if (status === 200) {
+        const { shipmentTrackingNumber, ...rest }: TCreateShipmentDHLResponse = data || {}
 
-      return await Shipment.findOne(ship._id)
-        .select('-documents -trackingUrl -packages')
-        .exec();
+        const ship = await Shipment.create({
+          userId: user.userId,
+          trackingNumber: shipmentTrackingNumber,
+          ...rest
+        })
+
+        const newShipment = await Shipment.findOne(ship._id)
+          .select('-documents -trackingUrl -packages')
+          .exec();
+
+        return {
+          status,
+          message,
+          data: newShipment
+        }
+      }
+
+      return {
+        message, status, data
+      }
     }
   } catch (error) {
     printLogs(`V2 Service ${getCarrierRates.name}`, error)
@@ -58,13 +85,13 @@ export const getAllShipments = async (req: CustomRequest) => {
 
   try {
     const shipments = await Shipment.find()
-      .select('-documents')
+      .select('-documents -trackingUrl -packages')
       .skip((pageNumber - 1) * limitNumber)
       .limit(limitNumber)
       .lean()
       .exec();
 
-    return { shipments, page: pageNumber };
+    return { message: '', status: 200, data: { shipments, page: pageNumber } };
   } catch (error) {
     printLogs(getAllShipments.name, error)
     return null
@@ -85,7 +112,7 @@ export const getShipment = async (id: string) => {
     }
   } catch (error) {
     printLogs(getAllShipments.name, error)
-    return { shipment: null, status: 500}
+    return { shipment: null, status: 500 }
   }
 };
 
@@ -108,7 +135,7 @@ export const getUserShipments = async (req: CustomRequest) => {
           .lean()
           .exec();
 
-        return { shipments, page: pageNumber };
+        return { data: { shipments, page: pageNumber }, status: 200 };
       }
     }
   } catch (error) {
@@ -137,12 +164,13 @@ export const getShipmentDocumentByTracking = async (req: Request) => {
       };
     });
 
-    return { status: 200, message: "Documents retrieved successfully", documents }
+    return { status: 200, message: "Documents retrieved successfully", data: documents }
   } catch (error) {
     printLogs(`Service ${getShipmentDocumentByTracking}`, error)
+
     return {
       status: 500,
-      documents: [],
+      data: [],
       message: "Internal Server Error"
     }
   }
@@ -150,12 +178,12 @@ export const getShipmentDocumentByTracking = async (req: Request) => {
 
 export const getShipmentTracking = async (trackingNumber: string) => {
   try {
-    const tracking = await getDHLShipmentTracking(trackingNumber)
+    const { data, message, status } = await getDHLShipmentTracking(trackingNumber)
 
     return {
-      status: 200,
-      message: 'Tracking retrieved successfully',
-      tracking
+      status,
+      message,
+      data
     }
   } catch (error) {
     printLogs(`Service ${getShipmentTracking.name}`, error)
