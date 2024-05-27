@@ -178,7 +178,7 @@ const getDHLRateGenericResponse = (rates) => {
         serviceName: productName,
         totalPrice: {
             currency: priceCurrencies || '',
-            price: (totalSum || 1) * parseFloat(constants_1.COMMISSION_PERCENTAGE.toFixed(2))
+            price: parseFloat(((totalSum || 1) * constants_1.COMMISSION_PERCENTAGE).toFixed(2))
         },
         weight: {
             unit: weight.unitOfMeasurement,

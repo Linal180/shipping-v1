@@ -31,7 +31,7 @@ const getRates = (params) => __awaiter(void 0, void 0, void 0, function* () {
         length,
         width,
         height,
-        plannedShippingDate: (0, lib_1.getCurrentDate)(),
+        plannedShippingDate: '2024-05-21', // Right now we have a product for this date
         isCustomsDeclarable: false,
         unitOfMeasurement: 'metric'
     };
